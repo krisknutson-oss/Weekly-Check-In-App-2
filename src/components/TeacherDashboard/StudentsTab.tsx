@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { ClassroomState, QuizSubmission, Student, Teacher } from '../../types';
-import { pin4, uid, saveClassroomState } from '../../utils/storage';
+import { ClassroomState, QuizSubmission, Student, Teacher, ClassroomData } from '../../types';
+import { pin4, uid, saveClassroomState, loadAppStore, copyStudentsBetweenClasses } from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
 import {
   UserPlus,
@@ -23,6 +23,11 @@ import {
   Share2,
   QrCode,
   Globe,
+  FolderInput,
+  Search,
+  CheckSquare,
+  Square,
+  ArrowRight,
 } from 'lucide-react';
 
 interface StudentsTabProps {
@@ -43,6 +48,15 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [armedDeleteId, setArmedDeleteId] = useState<string | null>(null);
   const [armedDeleteTeacherId, setArmedDeleteTeacherId] = useState<string | null>(null);
+
+  // Copy from Class Modal State
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [sourceClassId, setSourceClassId] = useState<string>('');
+  const [selectedStudentIdsToCopy, setSelectedStudentIdsToCopy] = useState<string[]>([]);
+  const [copyPreservePins, setCopyPreservePins] = useState(true);
+  const [copySkipDuplicates, setCopySkipDuplicates] = useState(true);
+  const [copySearchQuery, setCopySearchQuery] = useState('');
+  const [copyFeedbackToast, setCopyFeedbackToast] = useState<string | null>(null);
 
   // Print Sheet Customization State
   const [printLayout, setPrintLayout] = useState<'slips' | 'table'>('slips');
@@ -69,6 +83,73 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
   const printIframeRef = useRef<HTMLIFrameElement | null>(null);
   const publishedWeeks = state.weeks.filter((w) => w.status === 'published');
+
+  // Load available source classes for copying
+  const appStore = loadAppStore();
+  const availableSourceClasses = appStore.classes.filter((c) => c.id !== state.id);
+  const currentSourceClass = availableSourceClasses.find((c) => c.id === sourceClassId) || availableSourceClasses[0] || null;
+
+  // Open copy students modal
+  const handleOpenCopyModal = () => {
+    playClickSound();
+    if (availableSourceClasses.length > 0) {
+      const defaultSrc = availableSourceClasses[0];
+      setSourceClassId(defaultSrc.id);
+      
+      const existingNames = new Set(state.students.map((s) => s.name.trim().toLowerCase()));
+      const initialSelected = defaultSrc.students
+        .filter((s) => !existingNames.has(s.name.trim().toLowerCase()))
+        .map((s) => s.id);
+      
+      setSelectedStudentIdsToCopy(initialSelected.length > 0 ? initialSelected : defaultSrc.students.map((s) => s.id));
+    }
+    setCopySearchQuery('');
+    setShowCopyModal(true);
+  };
+
+  // Change source class inside modal
+  const handleSelectSourceClass = (newSrcId: string) => {
+    setSourceClassId(newSrcId);
+    const targetSrc = availableSourceClasses.find((c) => c.id === newSrcId);
+    if (targetSrc) {
+      const existingNames = new Set(state.students.map((s) => s.name.trim().toLowerCase()));
+      const selectable = targetSrc.students
+        .filter((s) => (copySkipDuplicates ? !existingNames.has(s.name.trim().toLowerCase()) : true))
+        .map((s) => s.id);
+      setSelectedStudentIdsToCopy(selectable);
+    } else {
+      setSelectedStudentIdsToCopy([]);
+    }
+  };
+
+  // Execute copying students from source class to current class
+  const handleExecuteCopyStudents = () => {
+    if (!currentSourceClass || selectedStudentIdsToCopy.length === 0 || !state.id) return;
+
+    const result = copyStudentsBetweenClasses(
+      currentSourceClass.id,
+      state.id,
+      selectedStudentIdsToCopy,
+      {
+        preservePins: copyPreservePins,
+        skipExistingNames: copySkipDuplicates,
+      }
+    );
+
+    if (result.updatedTargetClass) {
+      const updatedState: ClassroomState = {
+        ...state,
+        students: result.updatedTargetClass.students,
+      };
+      saveClassroomState(updatedState);
+      onUpdateState(updatedState);
+      playSuccessChime();
+
+      setCopyFeedbackToast(`Successfully copied ${result.copiedCount} student(s) from "${currentSourceClass.className}"!`);
+      setTimeout(() => setCopyFeedbackToast(null), 4000);
+      setShowCopyModal(false);
+    }
+  };
 
   // Add single student
   const handleAddStudent = (e: React.FormEvent) => {
@@ -549,6 +630,16 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
           </button>
 
           <button
+            id="open-copy-class-modal-btn"
+            onClick={handleOpenCopyModal}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-xs text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
+            title="Copy students from another class into this classroom roster"
+          >
+            <FolderInput className="w-3.5 h-3.5 text-[var(--gold)]" />
+            <span>Copy from Class</span>
+          </button>
+
+          <button
             id="open-bulk-add-modal-btn"
             onClick={() => {
               playClickSound();
@@ -573,6 +664,23 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Success / Feedback Toast */}
+      {copyFeedbackToast && (
+        <div className="bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 px-4 py-3 rounded-xs text-xs font-mono flex items-center justify-between shadow-lg animate-in fade-in">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{copyFeedbackToast}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setCopyFeedbackToast(null)}
+            className="text-emerald-400 hover:text-white cursor-pointer ml-3 font-bold"
+          >
+            &times;
+          </button>
+        </div>
+      )}
 
       {/* Quick Add Form */}
       <form onSubmit={handleAddStudent} className="bg-[#161616] border border-[#1F1F1F] rounded-xs p-4 flex flex-col sm:flex-row gap-3 items-center">
@@ -601,14 +709,39 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
       {/* Roster Table */}
       {state.students.length === 0 ? (
-        <div className="border border-dashed border-[#1F1F1F] rounded-xs p-10 text-center bg-[#161616]">
+        <div className="border border-dashed border-[#1F1F1F] rounded-xs p-10 text-center bg-[#161616] space-y-4">
           <Users className="w-10 h-10 text-[#666666] mx-auto mb-2" />
-          <h4 className="font-serif italic text-lg text-white mb-1">
-            No students enrolled yet
-          </h4>
-          <p className="text-xs text-[#888888] max-w-md mx-auto font-light">
-            Add students above or use Bulk Add to paste your class roster. Each student will receive a secure 4-digit PIN.
-          </p>
+          <div>
+            <h4 className="font-serif italic text-lg text-white mb-1">
+              No students enrolled yet
+            </h4>
+            <p className="text-xs text-[#888888] max-w-md mx-auto font-light">
+              Add students above, paste your roster via Bulk Add, or copy existing students from another classroom in your ledger.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            <button
+              type="button"
+              onClick={handleOpenCopyModal}
+              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[var(--gold)]/40 text-[var(--gold)] rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition shadow-xs"
+            >
+              <FolderInput className="w-3.5 h-3.5" />
+              <span>Copy from Another Class</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                playClickSound();
+                setShowBulkModal(true);
+              }}
+              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-white rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
+            >
+              <Users className="w-3.5 h-3.5 text-[#AAAAAA]" />
+              <span>Bulk Add Names</span>
+            </button>
+          </div>
         </div>
       ) : (
         <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs overflow-hidden shadow-lg">
@@ -1162,6 +1295,241 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               >
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Copy Students from Another Class Modal */}
+      {showCopyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-[#121212] border border-[#2A2A2A] rounded-sm max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-4 sm:p-5 border-b border-[#222222] flex items-center justify-between shrink-0 bg-[#161616]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xs bg-[var(--gold)]/10 border border-[var(--gold)]/30 flex items-center justify-center text-[var(--gold)]">
+                  <FolderInput className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="font-serif italic text-lg text-white">
+                    Copy Students from Class<span className="text-[#888888]">.</span>
+                  </h3>
+                  <p className="text-[11px] font-mono text-[#888888]">
+                    Target: <strong className="text-white">{state.className}</strong>
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCopyModal(false)}
+                className="text-xs font-mono text-[#888888] hover:text-white cursor-pointer px-2 py-1"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 text-xs">
+              {availableSourceClasses.length === 0 ? (
+                <div className="p-6 text-center border border-dashed border-[#262626] rounded-xs space-y-2 bg-[#161616]">
+                  <Users className="w-8 h-8 text-[#666666] mx-auto" />
+                  <p className="font-serif italic text-white text-base">No other classes available</p>
+                  <p className="text-[#888888] text-[11px] font-mono">
+                    Create another classroom in the top header switcher first, then you can copy rosters between them.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Select Source Class */}
+                  <div>
+                    <label className="block text-[10px] font-mono uppercase tracking-widest text-[#888888] mb-1.5">
+                      Select Source Classroom to Copy From
+                    </label>
+                    <select
+                      value={sourceClassId}
+                      onChange={(e) => handleSelectSourceClass(e.target.value)}
+                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[#444444] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
+                    >
+                      {availableSourceClasses.map((cls) => (
+                        <option key={cls.id} value={cls.id}>
+                          {cls.className} {cls.period ? `(${cls.period})` : ''} &middot; {cls.students.length} students enrolled
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {currentSourceClass && (
+                    <>
+                      {/* Search & Bulk Select Controls */}
+                      {currentSourceClass.students.length > 0 ? (
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                            {/* Search Filter */}
+                            <div className="relative flex-1">
+                              <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#777777]" />
+                              <input
+                                type="text"
+                                value={copySearchQuery}
+                                onChange={(e) => setCopySearchQuery(e.target.value)}
+                                placeholder="Filter student names..."
+                                className="w-full pl-8 pr-3 py-1.5 bg-[#181818] border border-[#2A2A2A] rounded-xs text-xs text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] font-sans"
+                              />
+                            </div>
+
+                            {/* Bulk Select Actions */}
+                            <div className="flex items-center gap-2 shrink-0 text-[10px] font-mono">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const filtered = currentSourceClass.students
+                                    .filter((s) => s.name.toLowerCase().includes(copySearchQuery.toLowerCase()))
+                                    .map((s) => s.id);
+                                  setSelectedStudentIdsToCopy(filtered);
+                                }}
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#CCCCCC] hover:text-white rounded-xs transition cursor-pointer"
+                              >
+                                Select All ({currentSourceClass.students.length})
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const existing = new Set(state.students.map((s) => s.name.trim().toLowerCase()));
+                                  const nonEnrolled = currentSourceClass.students
+                                    .filter((s) => !existing.has(s.name.trim().toLowerCase()))
+                                    .map((s) => s.id);
+                                  setSelectedStudentIdsToCopy(nonEnrolled);
+                                }}
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[var(--gold)] rounded-xs transition cursor-pointer"
+                              >
+                                Select Non-Enrolled
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedStudentIdsToCopy([])}
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white rounded-xs transition cursor-pointer"
+                              >
+                                Clear
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Student Selection List */}
+                          <div className="border border-[#222222] rounded-xs bg-[#151515] max-h-52 overflow-y-auto divide-y divide-[#1F1F1F]">
+                            {currentSourceClass.students
+                              .filter((s) => s.name.toLowerCase().includes(copySearchQuery.toLowerCase()))
+                              .map((student) => {
+                                const isAlreadyInClass = state.students.some(
+                                  (cur) => cur.name.trim().toLowerCase() === student.name.trim().toLowerCase()
+                                );
+                                const isSelected = selectedStudentIdsToCopy.includes(student.id);
+
+                                return (
+                                  <div
+                                    key={student.id}
+                                    onClick={() => {
+                                      if (isSelected) {
+                                        setSelectedStudentIdsToCopy(selectedStudentIdsToCopy.filter((id) => id !== student.id));
+                                      } else {
+                                        setSelectedStudentIdsToCopy([...selectedStudentIdsToCopy, student.id]);
+                                      }
+                                    }}
+                                    className={`flex items-center justify-between px-3 py-2 cursor-pointer transition select-none ${
+                                      isSelected
+                                        ? 'bg-[var(--gold)]/5 hover:bg-[var(--gold)]/10'
+                                        : 'hover:bg-[#1A1A1A]'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <div className="text-white">
+                                        {isSelected ? (
+                                          <CheckSquare className="w-4 h-4 text-[var(--gold)]" />
+                                        ) : (
+                                          <Square className="w-4 h-4 text-[#555555]" />
+                                        )}
+                                      </div>
+                                      <span className={`text-xs ${isSelected ? 'text-white font-medium' : 'text-[#CCCCCC]'}`}>
+                                        {student.name}
+                                      </span>
+                                      {isAlreadyInClass && (
+                                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-xs bg-[#242424] text-[#888888] border border-[#333333]">
+                                          Already enrolled
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2 font-mono text-[11px]">
+                                      <span className="text-[#666666]">PIN:</span>
+                                      <span className="bg-[#242424] text-[var(--gold)] px-1.5 py-0.5 rounded-xs font-bold">
+                                        {student.pin}
+                                      </span>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                          </div>
+
+                          {/* Options Checklist */}
+                          <div className="bg-[#181818] border border-[#242424] rounded-xs p-3 space-y-2.5 font-mono text-[11px]">
+                            <label className="flex items-center gap-2 cursor-pointer text-[#CCCCCC] hover:text-white">
+                              <input
+                                type="checkbox"
+                                checked={copyPreservePins}
+                                onChange={(e) => setCopyPreservePins(e.target.checked)}
+                                className="accent-[var(--gold)] rounded-xs cursor-pointer"
+                              />
+                              <span>Preserve original 4-digit PINs (Students keep the same PINs across classes)</span>
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer text-[#CCCCCC] hover:text-white">
+                              <input
+                                type="checkbox"
+                                checked={copySkipDuplicates}
+                                onChange={(e) => setCopySkipDuplicates(e.target.checked)}
+                                className="accent-[var(--gold)] rounded-xs cursor-pointer"
+                              />
+                              <span>Skip duplicate students (Avoid adding same student name twice)</span>
+                            </label>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="p-6 text-center border border-dashed border-[#222222] rounded-xs text-[#888888]">
+                          Source class "{currentSourceClass.className}" has 0 students enrolled.
+                        </div>
+                      )}
+                    </>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 border-t border-[#222222] bg-[#161616] flex items-center justify-between shrink-0">
+              <span className="text-xs font-mono text-[#888888]">
+                {selectedStudentIdsToCopy.length} student{selectedStudentIdsToCopy.length === 1 ? '' : 's'} selected
+              </span>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCopyModal(false)}
+                  className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExecuteCopyStudents}
+                  disabled={selectedStudentIdsToCopy.length === 0 || !currentSourceClass}
+                  className={`px-4 py-2 font-mono font-bold text-xs uppercase tracking-wider rounded-xs transition cursor-pointer flex items-center gap-1.5 ${
+                    selectedStudentIdsToCopy.length > 0 && currentSourceClass
+                      ? 'bg-[var(--gold)] hover:bg-[#E5C158] text-black shadow-[0_0_12px_rgba(212,175,55,0.2)]'
+                      : 'bg-[#262626] text-[#555555] cursor-not-allowed'
+                  }`}
+                >
+                  <FolderInput className="w-3.5 h-3.5" />
+                  <span>Copy {selectedStudentIdsToCopy.length} Students</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

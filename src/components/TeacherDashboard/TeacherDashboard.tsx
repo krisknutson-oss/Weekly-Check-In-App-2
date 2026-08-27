@@ -59,6 +59,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   const [newPeriod, setNewPeriod] = useState('Period 1');
   const [newUnitGoal, setNewUnitGoal] = useState('');
   const [newCulminatingTitle, setNewCulminatingTitle] = useState('');
+  const [newCopyRosterFromClassId, setNewCopyRosterFromClassId] = useState('');
 
   // Edit Class Form State
   const [editClassName, setEditClassName] = useState(state.className);
@@ -91,7 +92,8 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       newSubject.trim() || 'General Studies',
       newPeriod.trim() || 'Period 1',
       newUnitGoal.trim() || 'Master weekly presentation concepts and key curriculum objectives.',
-      newCulminatingTitle.trim() || 'Final Unit Socratic Examination'
+      newCulminatingTitle.trim() || 'Final Unit Socratic Examination',
+      newCopyRosterFromClassId || undefined
     );
 
     const store = loadAppStore();
@@ -99,6 +101,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
     onUpdateState(updatedState);
 
     setNewClassName('');
+    setNewCopyRosterFromClassId('');
     setShowCreateClassModal(false);
     setShowClassMenu(false);
     playSuccessChime();
@@ -410,6 +413,29 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
               </div>
+
+              {teacherClasses.length > 0 && (
+                <div>
+                  <label className="block text-[10px] uppercase font-mono tracking-wider text-[#888888] mb-1">
+                    Copy Student Roster (Optional)
+                  </label>
+                  <select
+                    value={newCopyRosterFromClassId}
+                    onChange={(e) => setNewCopyRosterFromClassId(e.target.value)}
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
+                  >
+                    <option value="">None &mdash; Start with empty roster</option>
+                    {teacherClasses.map((cls) => (
+                      <option key={cls.id} value={cls.id}>
+                        Copy roster from: {cls.className} ({cls.students.length} students)
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-[10px] text-[#666666] font-mono mt-1">
+                    Enrolls all student names and preserves their 4-digit PINs in the newly created class.
+                  </p>
+                </div>
+              )}
 
               <div className="flex justify-end gap-2 pt-2 border-t border-[#222222]">
                 <button

@@ -327,7 +327,8 @@ export function addClassToTeacher(
   subject: string,
   period: string,
   unitGoal?: string,
-  culminatingTitle?: string
+  culminatingTitle?: string,
+  sourceClassToCopyRosterFrom?: string
 ): ClassroomData {
   const store = loadAppStore();
   const newClass = createNewIsolatedClass(
@@ -338,10 +339,73 @@ export function addClassToTeacher(
     unitGoal,
     culminatingTitle
   );
+
+  // If a source class was requested to copy students from
+  if (sourceClassToCopyRosterFrom) {
+    const sourceClass = store.classes.find((c) => c.id === sourceClassToCopyRosterFrom);
+    if (sourceClass && sourceClass.students.length > 0) {
+      newClass.students = sourceClass.students.map((stu) => ({
+        id: uid('stu'),
+        name: stu.name,
+        pin: stu.pin,
+        avatar: stu.avatar,
+        createdAt: Date.now(),
+      }));
+    }
+  }
+
   store.classes.push(newClass);
   store.activeClassIdByTeacher[teacherId] = newClass.id;
   saveAppStore(store);
   return newClass;
+}
+
+// Copy students from one class into another
+export function copyStudentsBetweenClasses(
+  sourceClassId: string,
+  targetClassId: string,
+  selectedStudentIds?: string[],
+  options: {
+    preservePins?: boolean;
+    skipExistingNames?: boolean;
+  } = { preservePins: true, skipExistingNames: true }
+): { copiedCount: number; updatedTargetClass: ClassroomData | null } {
+  const store = loadAppStore();
+  const sourceClass = store.classes.find((c) => c.id === sourceClassId);
+  const targetClass = store.classes.find((c) => c.id === targetClassId);
+
+  if (!sourceClass || !targetClass) {
+    return { copiedCount: 0, updatedTargetClass: null };
+  }
+
+  const existingNames = new Set(targetClass.students.map((s) => s.name.trim().toLowerCase()));
+  const sourceStudents =
+    selectedStudentIds && selectedStudentIds.length > 0
+      ? sourceClass.students.filter((s) => selectedStudentIds.includes(s.id))
+      : sourceClass.students;
+
+  const newStudents: Student[] = [];
+
+  for (const stu of sourceStudents) {
+    if (options.skipExistingNames && existingNames.has(stu.name.trim().toLowerCase())) {
+      continue;
+    }
+
+    newStudents.push({
+      id: uid('stu'),
+      name: stu.name.trim(),
+      pin: options.preservePins ? stu.pin : pin4(),
+      avatar: stu.avatar,
+      createdAt: Date.now(),
+    });
+    existingNames.add(stu.name.trim().toLowerCase());
+  }
+
+  targetClass.students = [...targetClass.students, ...newStudents];
+  targetClass.updatedAt = Date.now();
+
+  saveAppStore(store);
+  return { copiedCount: newStudents.length, updatedTargetClass: targetClass };
 }
 
 // Update class data
