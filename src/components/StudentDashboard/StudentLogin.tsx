@@ -381,14 +381,12 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
               <span>Enter Weekly Check-Ins</span>
             </button>
 
-            {/* Hint for demo student */}
-            {selectedStudent && (
-              <div className="text-center pt-1">
-                <span className="text-[11px] font-mono text-[#888888]">
-                  Demo PIN for {selectedStudent.name}: <strong className="text-black font-bold bg-[#D4AF37] px-2 py-0.5 rounded-xs">{selectedStudent.pin}</strong>
-                </span>
-              </div>
-            )}
+            {/* Security reminder */}
+            <div className="text-center pt-1">
+              <span className="text-[11px] font-mono text-[#666666]">
+                Forgot your 4-digit PIN? Please check with your teacher.
+              </span>
+            </div>
           </form>
         </div>
       )}
