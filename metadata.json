@@ -1,0 +1,6 @@
+{
+  "name": "The Weekly Ledger",
+  "description": "Classroom progress tracker that transforms weekly slide decks into 20-question check-in quizzes with student PIN logins and class analytics.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
