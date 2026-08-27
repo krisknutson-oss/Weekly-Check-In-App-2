@@ -245,8 +245,6 @@ export default function App() {
             week={activeWeek}
             submission={
               (state.results[currentStudent.id] || {})[activeWeek.id] || {
-                studentId: currentStudent.id,
-                weekId: activeWeek.id,
                 score: 0,
                 total: activeWeek.quiz.length,
                 answers: [],
