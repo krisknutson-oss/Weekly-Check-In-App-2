@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { ClassroomState, ColorSchemeId, Student, Teacher, UserView, Week, ClassroomData } from './types';
+import { ClassroomState, ColorSchemeId, Student, Teacher, UserView, Week, ClassroomData, QuizSubmission } from './types';
 import {
   loadClassroomState,
   saveClassroomState,
   resetClassroomState,
   loadAppStore,
+  saveAppStore,
   buildClassroomStateFromClass,
   getActiveClassForTeacher,
 } from './utils/storage';
 import { getSavedColorScheme, saveColorScheme, applyColorSchemeToDOM } from './utils/theme';
+import {
+  syncLocalStoreWithCloud,
+  subscribeToAllClasses,
+  submitStudentQuizToCloud,
+  subscribeSyncStatus,
+  SyncStatus,
+} from './utils/firebaseSync';
 import { Topbar } from './components/Topbar';
 import { LandingView } from './components/LandingView';
 import { TeacherAuth } from './components/TeacherAuth';
@@ -27,6 +35,72 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
   const [teacherAuthInitialMode, setTeacherAuthInitialMode] = useState<'login' | 'create'>('login');
   const [currentTheme, setCurrentTheme] = useState<ColorSchemeId>(() => getSavedColorScheme());
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>('synced');
+
+  // Check URL query parameters for student join links or class codes
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const codeParam = params.get('code') || params.get('class');
+      if (codeParam && currentView === 'landing') {
+        setCurrentView('student-login');
+      }
+    } catch {}
+  }, []);
+
+  // Listen to sync status changes
+  useEffect(() => {
+    return subscribeSyncStatus((s) => setSyncStatus(s));
+  }, []);
+
+  // Perform initial cloud sync and listen for real-time updates from Firestore
+  useEffect(() => {
+    const localStore = loadAppStore();
+    syncLocalStoreWithCloud(localStore).then((syncedStore) => {
+      saveAppStore(syncedStore);
+      if (currentTeacher) {
+        const activeClass = getActiveClassForTeacher(currentTeacher.id);
+        setState(buildClassroomStateFromClass(activeClass, currentTeacher, syncedStore.teachers));
+      } else {
+        const firstTeacher = syncedStore.teachers[0];
+        const firstClass = syncedStore.classes[0];
+        if (firstTeacher && firstClass) {
+          setState((prev) => (prev.id ? prev : buildClassroomStateFromClass(firstClass, firstTeacher, syncedStore.teachers)));
+        }
+      }
+    });
+
+    // Real-time listener for any updates to classes (e.g. students completing quizzes or teachers publishing weeks)
+    const unsubscribe = subscribeToAllClasses((cloudClasses) => {
+      if (!cloudClasses || cloudClasses.length === 0) return;
+      const currentStore = loadAppStore();
+      currentStore.classes = cloudClasses;
+      try {
+        localStorage.setItem('the_weekly_ledger_multi_teacher_store_v1', JSON.stringify(currentStore));
+      } catch {}
+
+      setState((prevState) => {
+        const updatedDoc = cloudClasses.find((c) => c.id === prevState.id);
+        if (updatedDoc) {
+          return {
+            ...prevState,
+            className: updatedDoc.className,
+            classCode: updatedDoc.classCode,
+            subject: updatedDoc.subject,
+            period: updatedDoc.period,
+            unitGoal: updatedDoc.unitGoal,
+            culminatingActivityTitle: updatedDoc.culminatingActivityTitle,
+            students: updatedDoc.students || [],
+            weeks: updatedDoc.weeks || [],
+            results: updatedDoc.results || {},
+          };
+        }
+        return prevState;
+      });
+    });
+
+    return () => unsubscribe();
+  }, [currentTeacher?.id]);
 
   // Initialize and synchronize color scheme
   useEffect(() => {
@@ -136,9 +210,7 @@ export default function App() {
       }
     });
 
-    const submission = {
-      studentId: currentStudent.id,
-      weekId: activeWeek.id,
+    const submission: QuizSubmission = {
       score,
       total: activeWeek.quiz.length,
       answers,
@@ -159,6 +231,14 @@ export default function App() {
     };
 
     handleUpdateState(updatedState);
+
+    // Sync submission directly to Firebase Firestore
+    if (state.id) {
+      submitStudentQuizToCloud(state.id, currentStudent.id, activeWeek.id, submission).catch((err) => {
+        console.warn('Cloud submission queued or error:', err);
+      });
+    }
+
     setCurrentView('student-feedback');
   };
 
@@ -177,6 +257,7 @@ export default function App() {
         currentTheme={currentTheme}
         onThemeChange={handleThemeChange}
         onResetData={handleResetData}
+        syncStatus={syncStatus}
       />
 
       {/* Main Content Area */}
@@ -257,10 +338,16 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-[#1F1F1F] py-4 px-6 text-center text-xs font-mono text-[#666666] bg-[#0A0A0A]/80">
+      <footer className="border-t border-[#1F1F1F] py-4 px-6 text-center text-xs font-mono text-[#666666] bg-[#0A0A0A]/80 flex flex-col sm:flex-row items-center justify-between gap-2">
         <p>
-          The Weekly Ledger &middot; Isolated Educator Accounts &middot; Multi-Class Roster &amp; Theme Engine
+          The Weekly Ledger &middot; Cloud-Synced Classroom Engine &middot; Real-Time Multi-Device Roster
         </p>
+        <div className="flex items-center gap-2 text-[10px]">
+          <span className={`w-2 h-2 rounded-full ${syncStatus === 'synced' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : syncStatus === 'syncing' ? 'bg-amber-400 animate-pulse' : 'bg-rose-500'}`} />
+          <span className="uppercase tracking-widest text-[#888888]">
+            {syncStatus === 'synced' ? 'Cloud Connected' : syncStatus === 'syncing' ? 'Syncing...' : 'Offline'}
+          </span>
+        </div>
       </footer>
     </div>
   );

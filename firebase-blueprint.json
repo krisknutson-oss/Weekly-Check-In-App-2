@@ -1,0 +1,54 @@
+{
+  "entities": {
+    "classes": {
+      "title": "Classroom",
+      "description": "Active classes, student rosters, weekly quizzes, and student check-in submissions",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "teacherId": { "type": "string" },
+        "classCode": { "type": "string" },
+        "className": { "type": "string" },
+        "subject": { "type": "string" },
+        "period": { "type": "string" },
+        "unitGoal": { "type": "string" },
+        "culminatingActivityTitle": { "type": "string" },
+        "students": { "type": "array" },
+        "weeks": { "type": "array" },
+        "results": { "type": "object" },
+        "createdAt": { "type": "number" },
+        "updatedAt": { "type": "number" }
+      },
+      "required": ["id", "teacherId", "classCode", "className"]
+    },
+    "teachers": {
+      "title": "Teacher Profile",
+      "description": "Educator accounts and metadata",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "role": { "type": "string" },
+        "subject": { "type": "string" },
+        "createdAt": { "type": "number" }
+      },
+      "required": ["id", "name", "email"]
+    },
+    "submissions": {
+      "title": "Quiz Submission Record",
+      "description": "Student quiz attempts and scores",
+      "type": "object",
+      "properties": {
+        "classId": { "type": "string" },
+        "studentId": { "type": "string" },
+        "weekId": { "type": "string" },
+        "score": { "type": "number" },
+        "total": { "type": "number" },
+        "answers": { "type": "array" },
+        "submittedAt": { "type": "number" }
+      },
+      "required": ["classId", "studentId", "weekId", "score", "total"]
+    }
+  }
+}

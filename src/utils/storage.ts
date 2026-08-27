@@ -230,13 +230,21 @@ export function loadAppStore(): AppLedgerStore {
   }
 }
 
-// Save entire store to localStorage
+// Save entire store to localStorage and sync to Firebase Firestore
 export function saveAppStore(store: AppLedgerStore): void {
   try {
     localStorage.setItem(STORE_STORAGE_KEY, JSON.stringify(store));
   } catch (err) {
     console.error('Failed to save app store:', err);
   }
+
+  // Asynchronously push each class and teacher to cloud
+  try {
+    import('./firebaseSync').then(({ syncClassToCloud, syncTeacherToCloud }) => {
+      store.classes.forEach((c) => syncClassToCloud(c));
+      store.teachers.forEach((t) => syncTeacherToCloud(t));
+    }).catch(() => {});
+  } catch {}
 }
 
 // Create a new completely isolated class for a specific teacher

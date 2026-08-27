@@ -4,6 +4,7 @@ import { AppRoute, ClassroomState, ColorSchemeId, Student, Teacher } from '../ty
 import { playClickSound } from '../utils/sound';
 import { ThemeSelector } from './ThemeSelector';
 import { isDayMode, toggleNightDay, saveColorScheme } from '../utils/theme';
+import { SyncStatus } from '../utils/firebaseSync';
 
 interface TopbarProps {
   currentRoute?: AppRoute;
@@ -22,6 +23,7 @@ interface TopbarProps {
   onLogout?: () => void;
   onLogoutTeacher?: () => void;
   onLogoutStudent?: () => void;
+  syncStatus?: SyncStatus;
 }
 
 export const Topbar: React.FC<TopbarProps> = ({
@@ -41,6 +43,7 @@ export const Topbar: React.FC<TopbarProps> = ({
   onLogout,
   onLogoutTeacher,
   onLogoutStudent,
+  syncStatus = 'synced',
 }) => {
   const activeView = currentRoute || currentView || 'landing';
 

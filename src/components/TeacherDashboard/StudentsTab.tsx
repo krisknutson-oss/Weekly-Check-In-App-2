@@ -20,6 +20,9 @@ import {
   FileSpreadsheet,
   HelpCircle,
   CheckCircle2,
+  Share2,
+  QrCode,
+  Globe,
 } from 'lucide-react';
 
 interface StudentsTabProps {
@@ -47,6 +50,22 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
   const [customNote, setCustomNote] = useState('Enter this 4-digit PIN on the student portal for weekly reviews.');
   const [copiedRosterFeedback, setCopiedRosterFeedback] = useState(false);
   const [printNotification, setPrintNotification] = useState<string | null>(null);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [copiedShareLink, setCopiedShareLink] = useState(false);
+
+  const getStudentShareUrl = () => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    return `${origin}${pathname}?class=${encodeURIComponent(state.classCode || '')}`;
+  };
+
+  const handleCopyShareLink = () => {
+    const url = getStudentShareUrl();
+    navigator.clipboard.writeText(url);
+    setCopiedShareLink(true);
+    playSuccessChime();
+    setTimeout(() => setCopiedShareLink(false), 2500);
+  };
 
   const printIframeRef = useRef<HTMLIFrameElement | null>(null);
   const publishedWeeks = state.weeks.filter((w) => w.status === 'published');
@@ -516,6 +535,19 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            id="open-share-link-modal-btn"
+            onClick={() => {
+              playClickSound();
+              setShowShareModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-xs text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
+            title="Share direct student check-in link with your class"
+          >
+            <Share2 className="w-3.5 h-3.5 text-[var(--gold)]" />
+            <span>Share Class Link</span>
+          </button>
+
           <button
             id="open-bulk-add-modal-btn"
             onClick={() => {
@@ -1031,6 +1063,105 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   <span>Send to Printer</span>
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Class Link Modal */}
+      {showShareModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in">
+          <div className="bg-[#121212] border border-[#2A2A2A] rounded-sm max-w-lg w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#222222] pb-3">
+              <div className="flex items-center gap-2">
+                <Globe className="w-5 h-5 text-[var(--gold)]" />
+                <h3 className="font-serif italic text-lg text-white">
+                  Student Class Access Link<span className="text-[#888888]">.</span>
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="text-xs font-mono text-[#888888] hover:text-white cursor-pointer px-2 py-1"
+              >
+                ✕ Close
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-xs text-[#AAAAAA] leading-relaxed">
+                Students on other computers or phones can open this link to connect to your class, pick their name from the roster, and take active weekly quizzes with live score synchronization.
+              </p>
+
+              {/* Class Code & Direct Link */}
+              <div className="bg-[#181818] border border-[#2A2A2A] rounded-xs p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
+                    Classroom Code
+                  </span>
+                  <span className="font-mono text-sm font-bold text-[var(--gold)] bg-[#222222] px-2.5 py-0.5 rounded-xs">
+                    {state.classCode}
+                  </span>
+                </div>
+
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888] block mb-1.5">
+                    Direct Student Link
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      readOnly
+                      value={getStudentShareUrl()}
+                      className="w-full px-3 py-2 bg-[#0E0E0E] border border-[#333333] rounded-xs text-xs font-mono text-white select-all focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleCopyShareLink}
+                      className="px-4 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-black font-mono font-bold text-xs uppercase tracking-wider rounded-xs cursor-pointer transition shrink-0 flex items-center gap-1.5"
+                    >
+                      {copiedShareLink ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copy Link</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Instructions */}
+              <div className="text-[11px] font-mono text-[#888888] space-y-1.5 bg-[#161616] p-3 rounded-xs border border-[#202020]">
+                <div className="text-[#CCCCCC] font-medium mb-1">How students connect:</div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[var(--gold)] font-bold">1.</span>
+                  <span>Open the link above on any laptop, Chromebook, or tablet.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[var(--gold)] font-bold">2.</span>
+                  <span>Select their name and enter their 4-digit PIN.</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-[var(--gold)] font-bold">3.</span>
+                  <span>Their quiz scores will sync straight to your Results tab.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowShareModal(false)}
+                className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>

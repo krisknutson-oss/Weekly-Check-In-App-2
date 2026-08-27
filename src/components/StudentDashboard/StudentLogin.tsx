@@ -33,6 +33,17 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
 }) => {
   const [classesList, setClassesList] = useState<PublicClassInfo[]>(() => getPublicClassesList());
   const [selectedClassId, setSelectedClassId] = useState<string>(() => {
+    // Check if class code is in URL
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const codeParam = (params.get('code') || params.get('class') || '').trim().toUpperCase();
+      const classes = getPublicClassesList();
+      if (codeParam) {
+        const found = classes.find((c) => c.classCode.toUpperCase() === codeParam || c.id === codeParam);
+        if (found) return found.id;
+      }
+    } catch {}
+
     const saved = getLastSelectedStudentClass();
     const classes = getPublicClassesList();
     if (saved && classes.some((c) => c.id === saved)) {
@@ -42,6 +53,17 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
   });
 
   const [activeClassData, setActiveClassData] = useState<ClassroomData | null>(() => {
+    // Check URL first
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const codeParam = (params.get('code') || params.get('class') || '').trim().toUpperCase();
+      if (codeParam) {
+        const store = loadAppStore();
+        const found = store.classes.find((c) => c.classCode.toUpperCase() === codeParam || c.id === codeParam);
+        if (found) return found;
+      }
+    } catch {}
+
     const cid = getLastSelectedStudentClass() || (getPublicClassesList()[0]?.id ?? state.id);
     if (cid) {
       const found = getClassById(cid);
@@ -50,6 +72,12 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
     const store = loadAppStore();
     return store.classes[0] || null;
   });
+
+  // Re-read class list if background sync loads classes
+  useEffect(() => {
+    const list = getPublicClassesList();
+    setClassesList(list);
+  }, [state.students, state.className]);
 
   const [classCodeInput, setClassCodeInput] = useState('');
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
