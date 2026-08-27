@@ -4,6 +4,7 @@ import { extractPptxText } from '../../utils/pptx';
 import { SAMPLE_DECKS } from '../../utils/sampleDecks';
 import { uid, saveClassroomState } from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
+import { generateClientFallbackQuestions } from '../../utils/quizGenerator';
 import { 
   Plus, 
   Upload, 
@@ -69,7 +70,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
     playSuccessChime();
   };
 
-  // Upload PPTX and extract text + generate 20 questions via server Gemini
+  // Upload PPTX and extract text + generate 20 questions via server Gemini (or client fallback on static hosts)
   const handlePptxUpload = async (file: File, week: Week) => {
     setIsProcessing(true);
     setErrorMessage('');
@@ -77,25 +78,36 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
     try {
       const { text, slideCount } = await extractPptxText(file);
-      setProcessingStatus(`Extracted ${slideCount} slides! Authoring 20 questions with Gemini 3.7 Flash…`);
+      setProcessingStatus(`Extracted ${slideCount} slides! Authoring 20 questions…`);
 
-      // Call backend
-      const res = await fetch('/api/quiz/generate-from-slides', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slideText: text,
-          weekTitle: week.title,
-          unitGoal: state.unitGoal,
-        }),
-      });
+      let generatedQuiz: Question[] = [];
 
-      if (!res.ok) {
-        throw new Error('Failed to generate quiz from server.');
+      try {
+        // Attempt call to backend server
+        const res = await fetch('/api/quiz/generate-from-slides', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            slideText: text,
+            weekTitle: week.title,
+            unitGoal: state.unitGoal,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.questions) && data.questions.length > 0) {
+            generatedQuiz = data.questions;
+          }
+        }
+      } catch (networkErr) {
+        console.warn('Backend endpoint unavailable (static hosting mode), utilizing client generator:', networkErr);
       }
 
-      const data = await res.json();
-      const generatedQuiz: Question[] = data.questions;
+      // If backend was unreachable or returned empty, use the client-side generator
+      if (!generatedQuiz || generatedQuiz.length === 0) {
+        generatedQuiz = generateClientFallbackQuestions(text, week.title);
+      }
 
       const updatedWeek: Week = {
         ...week,
@@ -129,23 +141,38 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
     setProcessingStatus(`Generating curriculum outline and 20 questions for "${topicPrompt}"…`);
 
     try {
-      const res = await fetch('/api/quiz/generate-from-topic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ topic: topicPrompt.trim() }),
-      });
+      let finalTitle = selectedWeek.title || topicPrompt;
+      let finalSlideText = `[Slide 1] Core Introduction to ${topicPrompt}: Key definitions, historical background, and fundamental principles.\n[Slide 2] Major Concepts in ${topicPrompt}: Core mechanisms, active factors, and foundational terminology.\n[Slide 3] Key Processes: Step-by-step procedures and structural relationships.\n[Slide 4] Real-World Applications: Case studies, contemporary relevance, and impact.\n[Slide 5] Critical Analysis: Debates, perspectives, and problem-solving strategies.\n[Slide 6] Review & Culminating Connections: Preparation for the final unit assessment.`;
+      let finalQuestions: Question[] = [];
 
-      if (!res.ok) {
-        throw new Error('Server topic generation error.');
+      try {
+        const res = await fetch('/api/quiz/generate-from-topic', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic: topicPrompt.trim() }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.questions && data.questions.length > 0) {
+            finalTitle = data.title || finalTitle;
+            finalSlideText = data.slideText || finalSlideText;
+            finalQuestions = data.questions;
+          }
+        }
+      } catch (networkErr) {
+        console.warn('Backend unavailable (static hosting), using client generator:', networkErr);
       }
 
-      const data = await res.json();
+      if (!finalQuestions || finalQuestions.length === 0) {
+        finalQuestions = generateClientFallbackQuestions(finalSlideText, topicPrompt);
+      }
 
       const updatedWeek: Week = {
         ...selectedWeek,
-        title: selectedWeek.title || data.title || topicPrompt,
-        slideText: data.slideText,
-        quiz: data.questions,
+        title: finalTitle,
+        slideText: finalSlideText,
+        quiz: finalQuestions,
         status: 'draft',
       };
 
