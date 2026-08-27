@@ -115,13 +115,14 @@
    ========================================================================= */
 
 .theme-light {
-  /* Background overrides */
+  /* Background overrides for all dark/black surfaces */
   .bg-\[\#0A0A0A\],
   .bg-\[\#000000\],
   .bg-\[\#070D18\],
   .bg-\[\#06110A\],
   .bg-\[\#10070A\],
-  .bg-\[\#0D0814\] {
+  .bg-\[\#0D0814\],
+  .bg-black {
     background-color: var(--bg-dark) !important;
   }
 
@@ -138,7 +139,9 @@
   .bg-\[\#160F22\],
   .bg-\[\#0D0D0D\],
   .bg-\[\#101010\],
-  .bg-\[\#0E0E0E\] {
+  .bg-\[\#0E0E0E\],
+  .bg-\[\#151515\],
+  .bg-\[\#1A1A1A\] {
     background-color: var(--card-dark) !important;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
   }
@@ -160,7 +163,11 @@
   .bg-\[\#1A3624\],
   .bg-\[\#331B27\],
   .bg-\[\#2D1F45\],
-  .bg-\[\#2A2A2A\] {
+  .bg-\[\#2A2A2A\],
+  .bg-\[\#242424\],
+  .bg-\[\#262626\],
+  .bg-\[\#2F2F2F\],
+  .bg-\[\#333333\] {
     background-color: var(--card-elevated) !important;
   }
 
@@ -173,6 +180,8 @@
   .border-\[\#262626\],
   .border-\[\#222222\],
   .border-\[\#2A2A2A\],
+  .border-\[\#2F2F2F\],
+  .border-\[\#242424\],
   .border-\[\#1E1E1E\] {
     border-color: var(--border-dark) !important;
   }
@@ -182,8 +191,77 @@
   .border-\[\#264D34\],
   .border-\[\#451E2F\],
   .border-\[\#3E2A5E\],
-  .border-\[\#383838\] {
+  .border-\[\#383838\],
+  .border-\[\#444444\] {
     border-color: var(--border-subtle) !important;
+  }
+
+  /* =========================================================================
+     CRITICAL FIX: DAY MODE ERROR / ALERT / RED BOXES & TEXT READABILITY
+     ========================================================================= */
+  /* Red Alert & Warning Containers in Light Mode (No more black boxes!) */
+  .bg-\[\#EF4444\]\/10,
+  .bg-\[\#EF4444\]\/15,
+  .bg-\[\#EF4444\]\/20,
+  .bg-\[\#EF4444\]\/30,
+  .bg-\[\#DC2626\]\/10,
+  .bg-\[\#DC2626\]\/15,
+  .bg-\[\#1A1111\],
+  .bg-\[\#201010\] {
+    background-color: #FEF2F2 !important; /* Soft clean warm rose */
+    border-color: #FCA5A5 !important;
+  }
+
+  /* Red & Alert Text in Light Mode (Deep high-contrast crimson text for perfect legibility) */
+  .text-\[\#EF4444\],
+  .text-\[\#DC2626\],
+  .text-\[\#F87171\],
+  .text-\[\#FB7185\],
+  .text-\[\#F43F5E\],
+  .text-\[\#E11D48\],
+  .text-red-400,
+  .text-red-500,
+  .text-red-600 {
+    color: #991B1B !important; /* Deep WCAG AAA Crimson */
+  }
+
+  .border-\[\#EF4444\],
+  .border-\[\#EF4444\]\/20,
+  .border-\[\#EF4444\]\/30,
+  .border-\[\#EF4444\]\/40,
+  .border-\[\#EF4444\]\/50,
+  .border-\[\#EF4444\]\/60,
+  .border-\[\#DC2626\],
+  .border-\[\#F87171\] {
+    border-color: #FCA5A5 !important;
+  }
+
+  /* Red Badges & Solid Accent Buttons */
+  .bg-\[\#EF4444\],
+  .bg-\[\#DC2626\] {
+    background-color: #DC2626 !important;
+    color: #FFFFFF !important;
+  }
+
+  /* Success / Green Alert Boxes and Text in Light Mode */
+  .bg-\[\#22C55E\]\/10,
+  .bg-\[\#22C55E\]\/15,
+  .bg-\[\#22C55E\]\/20,
+  .bg-\[\#10B981\]\/10 {
+    background-color: #F0FDF4 !important;
+    border-color: #86EFAC !important;
+  }
+
+  .text-\[\#22C55E\],
+  .text-\[\#10B981\],
+  .text-\[\#34D399\] {
+    color: #15803D !important; /* Deep forest green */
+  }
+
+  /* Gold / Accent Text in Light Mode */
+  .text-\[\#D4AF37\],
+  .text-\[\#E5C158\] {
+    color: var(--gold) !important;
   }
 
   /* Reverse Text - Flip White/Bright Text into Deep High-Contrast Ink/Dark */
@@ -194,6 +272,18 @@
   .text-\[\#ECFDF5\],
   .text-\[\#E2E8F0\] {
     color: var(--text-primary) !important;
+  }
+
+  /* Specific exception for solid buttons with dark backgrounds */
+  button.bg-\[\#EF4444\] *,
+  button.bg-\[\#DC2626\] *,
+  button.bg-\[\#EF4444\],
+  button.bg-\[\#DC2626\],
+  span.bg-\[\#EF4444\],
+  span.bg-\[\#DC2626\],
+  span.bg-\[\#22C55E\],
+  span.bg-\[\#10B981\] {
+    color: #FFFFFF !important;
   }
 
   .text-\[\#E0E0E0\],
@@ -228,16 +318,34 @@
   .hover\:bg-\[\#1F1F1F\]:hover,
   .hover\:bg-\[\#181818\]:hover,
   .hover\:bg-\[\#161616\]:hover,
-  .hover\:bg-\[\#202020\]:hover {
+  .hover\:bg-\[\#1A1A1A\]:hover,
+  .hover\:bg-\[\#202020\]:hover,
+  .hover\:bg-\[\#2A2A2A\]:hover {
     background-color: var(--card-elevated) !important;
+  }
+
+  .hover\:bg-\[\#201010\]:hover,
+  .hover\:bg-\[\#EF4444\]\/10:hover,
+  .hover\:bg-\[\#EF4444\]\/20:hover {
+    background-color: #FEE2E2 !important;
   }
 
   .hover\:text-white:hover {
     color: var(--text-primary) !important;
   }
 
-  .hover\:border-\[\#333333\]:hover {
+  .hover\:text-\[\#EF4444\]:hover {
+    color: #7F1D1D !important;
+  }
+
+  .hover\:border-\[\#333333\]:hover,
+  .hover\:border-\[\#444444\]:hover {
     border-color: var(--border-subtle) !important;
+  }
+
+  .hover\:border-\[\#EF4444\]\/50:hover,
+  .hover\:border-\[\#EF4444\]\/60:hover {
+    border-color: #F87171 !important;
   }
 
   /* Form elements */
