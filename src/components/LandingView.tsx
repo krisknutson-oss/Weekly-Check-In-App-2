@@ -1,6 +1,6 @@
 import React from 'react';
-import { AppRoute, ClassroomState, Student } from '../types';
-import { Sparkles, Shield, Award, ArrowRight, KeyRound, UserPlus, LogIn } from 'lucide-react';
+import { AppRoute, ClassroomState } from '../types';
+import { Sparkles, Shield, Award, ArrowRight, LogIn } from 'lucide-react';
 import { playClickSound } from '../utils/sound';
 
 interface LandingViewProps {
@@ -116,7 +116,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
 
       {/* Classroom Status Snapshot */}
       <div className="w-full max-w-3xl bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 text-left shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F1F1F] pb-5 mb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-[#666666] mb-1">Active Course</div>
             <h4 className="font-serif italic text-xl text-white">
@@ -135,36 +135,6 @@ export const LandingView: React.FC<LandingViewProps> = ({
               <div className="text-[9px] uppercase tracking-widest text-[#666666]">Modules</div>
               <div className="font-mono text-xs font-bold text-black bg-[#D4AF37] px-2 py-0.5 rounded-md">{publishedCount} Published</div>
             </div>
-          </div>
-        </div>
-
-        {/* Quick Demo Student Jump */}
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] uppercase tracking-[0.2em] text-[#888888] flex items-center gap-1.5 font-mono">
-              <KeyRound className="w-3.5 h-3.5 text-white" />
-              <span>Quick Test Access (Pre-loaded Roster &amp; PINs):</span>
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2.5">
-            {state.students.slice(0, 6).map((student) => (
-              <button
-                key={student.id}
-                id={`quick-login-${student.id}`}
-                onClick={() => {
-                  playClickSound();
-                  if (onQuickStudentLogin) onQuickStudentLogin(student.id);
-                  else if (onSelectRole) onSelectRole('student');
-                  else if (onNavigate) onNavigate('student-login');
-                }}
-                className="bg-[#161616] hover:bg-[#1F1F1F] border border-[#1F1F1F] hover:border-[#333333] rounded-lg px-3 py-1.5 text-xs text-[#E0E0E0] flex items-center gap-2 transition cursor-pointer group"
-              >
-                <span className="font-medium group-hover:text-white">{student.name}</span>
-                <span className="font-mono text-[10px] bg-[#D4AF37] text-black font-bold px-1.5 py-0.5 rounded-md">
-                  {student.pin}
-                </span>
-              </button>
-            ))}
           </div>
         </div>
       </div>

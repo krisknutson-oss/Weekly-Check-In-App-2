@@ -101,10 +101,8 @@ export const Topbar: React.FC<TopbarProps> = ({
           {currentStudent && (
             <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-md text-[#E0E0E0]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
-              <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono flex items-center gap-1.5">
-                <span>{currentStudent.name}</span>
-                <span>&middot;</span>
-                <span className="text-black font-bold bg-[#D4AF37] px-1.5 py-0.5 rounded-md">PIN: {currentStudent.pin}</span>
+              <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono">
+                {currentStudent.name}
               </span>
             </div>
           )}
