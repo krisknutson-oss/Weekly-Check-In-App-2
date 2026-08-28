@@ -359,7 +359,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
             setErrorMessage('');
             setSuccessMessage('');
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[11px] uppercase tracking-widest font-mono font-semibold transition cursor-pointer border ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-mono font-semibold transition cursor-pointer border ${
             mode === 'login'
               ? 'bg-[#161616] text-[var(--gold)] border-[var(--gold)]/60 shadow-[0_0_10px_rgba(212,175,55,0.12)]'
               : 'bg-[#121212] text-[#888888] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -378,7 +378,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
             setErrorMessage('');
             setSuccessMessage('');
           }}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-xs text-[11px] uppercase tracking-widest font-mono font-semibold transition cursor-pointer border ${
+          className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-[11px] uppercase tracking-widest font-mono font-semibold transition cursor-pointer border ${
             mode === 'create'
               ? 'bg-[#161616] text-[var(--gold)] border-[var(--gold)]/60 shadow-[0_0_10px_rgba(212,175,55,0.12)]'
               : 'bg-[#121212] text-[#888888] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -390,12 +390,12 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
       </div>
 
       {/* Auth Card Container */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-sm p-6 sm:p-8 shadow-2xl">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 shadow-2xl">
         {/* Error Alert */}
         {errorMessage && (
           <div
             id="auth-error-alert"
-            className="mb-5 bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 text-xs text-[#EF4444] flex items-start gap-2.5 rounded-r-xs font-mono"
+            className="mb-5 bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 text-xs text-[#EF4444] flex items-start gap-2.5 rounded-r-lg font-mono"
           >
             <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="leading-relaxed">{errorMessage}</span>
@@ -406,7 +406,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
         {successMessage && (
           <div
             id="auth-success-alert"
-            className="mb-5 bg-[#22C55E]/10 border-l-2 border-[#22C55E] p-3.5 text-xs text-[#22C55E] flex items-start gap-2.5 rounded-r-xs font-mono"
+            className="mb-5 bg-[#22C55E]/10 border-l-2 border-[#22C55E] p-3.5 text-xs text-[#22C55E] flex items-start gap-2.5 rounded-r-lg font-mono"
           >
             <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" />
             <span className="leading-relaxed">{successMessage}</span>
@@ -443,7 +443,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="teacher@school.edu"
-                className="w-full px-3.5 py-2.5 pl-10 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-sans"
+                className="w-full px-3.5 py-2.5 pl-10 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-sans"
                 required
               />
               <Mail className="w-4 h-4 text-[#666666] absolute left-3.5 top-3 pointer-events-none" />
@@ -478,7 +478,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full px-3.5 py-2.5 pl-10 pr-10 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
+                  className="w-full px-3.5 py-2.5 pl-10 pr-10 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
                   required
                 />
                 <Lock className="w-4 h-4 text-[#666666] absolute left-3.5 top-3 pointer-events-none" />
@@ -500,7 +500,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 type="checkbox"
                 checked={rememberMe}
                 onChange={(e) => setRememberMe(e.target.checked)}
-                className="w-3.5 h-3.5 rounded-xs accent-[var(--gold)] bg-[#161616] border-[#1F1F1F] cursor-pointer"
+                className="w-3.5 h-3.5 rounded-sm accent-[var(--gold)] bg-[#161616] border-[#1F1F1F] cursor-pointer"
               />
               <label htmlFor="remember-me-toggle" className="text-xs text-[#888888] font-mono cursor-pointer select-none">
                 Keep me logged in for this browser session
@@ -512,7 +512,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
               id="teacher-login-submit-btn"
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-xs text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-lg text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <LogIn className="w-4 h-4" />
               <span>Log In to Isolated Account</span>
@@ -530,7 +530,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                     return (
                       <div
                         key={t.id}
-                        className="w-full p-2.5 bg-[#161616] hover:bg-[#1C1C1C] border border-[#222222] hover:border-[var(--gold)]/50 rounded-xs transition flex items-center justify-between group"
+                        className="w-full p-2.5 bg-[#161616] hover:bg-[#1C1C1C] border border-[#222222] hover:border-[var(--gold)]/50 rounded-xl transition flex items-center justify-between group"
                       >
                         <button
                           type="button"
@@ -556,7 +556,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                             type="button"
                             onClick={() => handleSelectExistingTeacher(t)}
                             title="Select this educator"
-                            className="p-1.5 text-[#555555] hover:text-[var(--gold)] hover:bg-[#222222] rounded-xs cursor-pointer transition"
+                            className="p-1.5 text-[#555555] hover:text-[var(--gold)] hover:bg-[#222222] rounded-lg cursor-pointer transition"
                           >
                             <UserCheck className="w-4 h-4" />
                           </button>
@@ -568,7 +568,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                               setTeacherToDelete(t);
                             }}
                             title={`Remove registered account for ${t.name}`}
-                            className="p-1.5 text-[#666666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xs cursor-pointer transition"
+                            className="p-1.5 text-[#666666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg cursor-pointer transition"
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -585,7 +585,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
         {/* MODE 2: CREATE TEACHER ACCOUNT (ISOLATED) */}
         {mode === 'create' && (
           <form onSubmit={handleCreate} className="space-y-4">
-            <div className="bg-[#161616] border border-[#262626] p-3 rounded-xs text-[11px] font-mono text-[#AAAAAA] flex items-start gap-2 mb-3">
+            <div className="bg-[#161616] border border-[#262626] p-3.5 rounded-xl text-[11px] font-mono text-[#AAAAAA] flex items-start gap-2 mb-3">
               <Sparkles className="w-4 h-4 text-[var(--gold)] shrink-0 mt-0.5" />
               <span>
                 <strong>Isolated Account Guarantee:</strong> Your new account will have its own private classroom, students, weekly quizzes, and grades. Other educators cannot view or alter your classes.
@@ -602,7 +602,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Dr. Sarah Jenkins, Mr. Alvarez, etc."
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
                 required
               />
             </div>
@@ -617,7 +617,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="s.jenkins@highschool.edu"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
                 required
               />
             </div>
@@ -633,7 +633,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
                   placeholder="e.g. World History, Biology"
-                  className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
+                  className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
                 />
               </div>
 
@@ -647,7 +647,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                   value={initialClassName}
                   onChange={(e) => setInitialClassName(e.target.value)}
                   placeholder="e.g. Period 1: AP European History"
-                  className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
+                  className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition"
                 />
               </div>
             </div>
@@ -664,7 +664,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 pr-8 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
+                    className="w-full px-3.5 py-2.5 pr-8 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
                     required
                   />
                   <button
@@ -688,7 +688,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 pr-8 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
+                    className="w-full px-3.5 py-2.5 pr-8 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] transition font-mono"
                     required
                   />
                   <button
@@ -706,7 +706,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
               id="create-teacher-submit-btn"
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 px-4 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-xs text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full py-3 px-4 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-lg text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] mt-2 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <UserPlus className="w-4 h-4" />
               <span>Create Isolated Account &amp; Classroom</span>
@@ -730,7 +730,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="teacher@school.edu"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)]"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)]"
                 required
               />
             </div>
@@ -739,13 +739,13 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
               <button
                 type="button"
                 onClick={() => setMode('login')}
-                className="px-4 py-2.5 bg-[#161616] border border-[#222222] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                className="px-4 py-2.5 bg-[#161616] border border-[#222222] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="flex-1 py-2.5 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-xs text-xs cursor-pointer transition"
+                className="flex-1 py-2.5 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-lg text-xs cursor-pointer transition"
               >
                 Generate Recovery Code
               </button>
@@ -757,7 +757,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
         {mode === 'reset' && (
           <form onSubmit={handleResetPassword} className="space-y-4">
             {simulatedCode && (
-              <div className="p-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xs text-xs text-[var(--gold)] font-mono flex items-center justify-between">
+              <div className="p-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-lg text-xs text-[var(--gold)] font-mono flex items-center justify-between">
                 <span>Recovery Code: <strong>{simulatedCode}</strong></span>
                 <button
                   type="button"
@@ -778,7 +778,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={resetCodeInput}
                 onChange={(e) => setResetCodeInput(e.target.value)}
                 placeholder="XXXX-XXXX"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)] uppercase"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)] uppercase"
                 required
               />
             </div>
@@ -792,7 +792,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
                 required
               />
             </div>
@@ -806,14 +806,14 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full py-3 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-xs text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+              className="w-full py-3 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-widest rounded-lg text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
             >
               Update Password &amp; Log In
             </button>
@@ -824,7 +824,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
       {/* Delete Teacher Account Confirmation Modal */}
       {teacherToDelete && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#121212] border border-[#EF4444]/40 rounded-xs max-w-md w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
+          <div className="bg-[#121212] border border-[#EF4444]/40 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150">
             <div className="flex items-center gap-2.5 text-[#EF4444] border-b border-[#262626] pb-3">
               <Trash2 className="w-5 h-5 shrink-0" />
               <h3 className="font-mono text-sm uppercase tracking-wider font-semibold">
@@ -838,7 +838,7 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
               <span className="font-mono text-[var(--gold)]">{teacherToDelete.email}</span>)?
             </p>
 
-            <div className="bg-[#1A1111] border border-[#EF4444]/20 p-3 rounded-xs text-[11px] font-mono text-[#EF4444] space-y-1">
+            <div className="bg-[#1A1111] border border-[#EF4444]/20 p-3.5 rounded-xl text-[11px] font-mono text-[#EF4444] space-y-1">
               <div className="font-semibold uppercase tracking-wider">This destructive action will:</div>
               <ul className="list-disc list-inside space-y-0.5 text-[#FFAAAA]">
                 <li>Permanently remove all classes created by this teacher</li>
@@ -851,14 +851,14 @@ export const TeacherAuth: React.FC<TeacherAuthProps> = ({
               <button
                 type="button"
                 onClick={() => setTeacherToDelete(null)}
-                className="px-4 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-[#CCCCCC] text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+                className="px-4 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-[#CCCCCC] text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDeleteTeacher}
-                className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-mono uppercase tracking-wider font-semibold rounded-xs cursor-pointer transition shadow-[0_0_15px_rgba(239,68,68,0.3)] flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-mono uppercase tracking-wider font-semibold rounded-lg cursor-pointer transition shadow-[0_0_15px_rgba(239,68,68,0.3)] flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Permanently Delete</span>

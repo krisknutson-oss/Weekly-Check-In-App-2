@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ClassroomState, Question, Week, WeekStatus } from '../../types';
 import { extractPptxText } from '../../utils/pptx';
 import { SAMPLE_DECKS } from '../../utils/sampleDecks';
-import { uid, saveClassroomState } from '../../utils/storage';
+import { uid, saveClassroomState, clearAllScoresForWeek } from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
 import { generateClientFallbackQuestions } from '../../utils/quizGenerator';
 import { 
@@ -16,7 +16,10 @@ import {
   Wand2, 
   RefreshCw, 
   FileUp, 
-  Layers 
+  Layers,
+  RotateCcw,
+  CheckCircle2,
+  AlertOctagon
 } from 'lucide-react';
 
 interface WeeksTabProps {
@@ -38,6 +41,8 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
   const [topicPrompt, setTopicPrompt] = useState('');
   const [showTopicModal, setShowTopicModal] = useState(false);
   const [armedDeleteWeekId, setArmedDeleteWeekId] = useState<string | null>(null);
+  const [showClearWeekScoresModal, setShowClearWeekScoresModal] = useState(false);
+  const [feedbackToast, setFeedbackToast] = useState<string | null>(null);
 
   const selectedWeek = state.weeks.find((w) => w.id === selectedWeekId) || null;
 
@@ -256,6 +261,38 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
     }
   };
 
+  // Clear all student submissions for the active week
+  const handlePerformClearWeekScores = () => {
+    if (!selectedWeek || !state.id) return;
+    playStampSound();
+    
+    const updatedState: ClassroomState = {
+      ...state,
+      results: { ...state.results },
+    };
+
+    // Remove all submissions for this week
+    Object.keys(updatedState.results).forEach((sId) => {
+      if (updatedState.results[sId] && updatedState.results[sId][selectedWeek.id]) {
+        const studentMap = { ...updatedState.results[sId] };
+        delete studentMap[selectedWeek.id];
+        if (Object.keys(studentMap).length === 0) {
+          delete updatedState.results[sId];
+        } else {
+          updatedState.results[sId] = studentMap;
+        }
+      }
+    });
+
+    saveClassroomState(updatedState);
+    onUpdateState(updatedState);
+    clearAllScoresForWeek(state.id, selectedWeek.id);
+
+    setShowClearWeekScoresModal(false);
+    setFeedbackToast(`Cleared all student quiz scores for "${selectedWeek.title}". Students can now retake this check-in.`);
+    setTimeout(() => setFeedbackToast(null), 4500);
+  };
+
   // Question editing handlers
   const updateQuestionText = (qi: number, text: string) => {
     if (!selectedWeek) return;
@@ -291,6 +328,23 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
   return (
     <div className="space-y-6">
+      {/* Toast Feedback */}
+      {feedbackToast && (
+        <div className="bg-[#142318] border border-[#22C55E]/40 text-[#4ADE80] px-4 py-3 rounded-xl text-xs font-mono flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#22C55E] shrink-0" />
+            <span>{feedbackToast}</span>
+          </div>
+          <button
+            type="button"
+            onClick={() => setFeedbackToast(null)}
+            className="text-[#4ADE80] hover:text-white cursor-pointer ml-3 font-bold text-sm"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F1F1F] pb-4">
         <div>
@@ -308,7 +362,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
             playClickSound();
             setIsAddingWeek(!isAddingWeek);
           }}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.2)] self-start sm:self-auto"
+          className="flex items-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.2)] self-start sm:self-auto"
         >
           <Plus className="w-3.5 h-3.5" />
           <span>Add New Week</span>
@@ -317,7 +371,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
       {/* Add Week Form Drawer */}
       {isAddingWeek && (
-        <form onSubmit={handleCreateWeek} className="bg-[#161616] border border-[#1F1F1F] rounded-xs p-5 shadow-xl space-y-4">
+        <form onSubmit={handleCreateWeek} className="bg-[#161616] border border-[#1F1F1F] rounded-2xl p-5 shadow-xl space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-serif italic text-lg text-white">
               Create New Weekly Module<span className="text-[#D4AF37]">.</span>
@@ -342,7 +396,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
                 placeholder="e.g. Week 3: Cell Biology &amp; Mitosis"
-                className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[#D4AF37] transition"
+                className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#D4AF37] transition"
                 required
               />
             </div>
@@ -357,7 +411,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 value={newUnitGoal}
                 onChange={(e) => setNewUnitGoal(e.target.value)}
                 placeholder="e.g. Unit 3: Cellular Foundations"
-                className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[#D4AF37] transition"
+                className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#D4AF37] transition"
               />
             </div>
           </div>
@@ -366,7 +420,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
             <button
               type="submit"
               id="confirm-create-week-btn"
-              className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer"
+              className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer"
             >
               Create Module &amp; Add Slides
             </button>
@@ -388,7 +442,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                   setSelectedWeekId(week.id);
                   setErrorMessage('');
                 }}
-                className={`px-4 py-2 rounded-t-xs text-xs font-mono uppercase tracking-wider whitespace-nowrap transition cursor-pointer flex items-center gap-2 border-t border-x ${
+                className={`px-4 py-2 rounded-t-lg text-xs font-mono uppercase tracking-wider whitespace-nowrap transition cursor-pointer flex items-center gap-2 border-t border-x ${
                   isSelected
                     ? 'bg-[#161616] border-[#D4AF37]/50 text-[#D4AF37] shadow-sm'
                     : 'bg-[#0A0A0A] border-[#1F1F1F] text-[#666666] hover:text-white hover:border-[#333333]'
@@ -410,7 +464,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
       {/* Week Content Display */}
       {!selectedWeek ? (
-        <div className="border border-dashed border-[#1F1F1F] rounded-xs p-10 text-center bg-[#161616]">
+        <div className="border border-dashed border-[#1F1F1F] rounded-2xl p-10 text-center bg-[#161616]">
           <BookOpen className="w-10 h-10 text-[#666666] mx-auto mb-2" />
           <h4 className="font-serif italic text-lg text-white mb-1">
             No weekly modules created yet
@@ -420,14 +474,14 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
           </p>
           <button
             onClick={() => setIsAddingWeek(true)}
-            className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer inline-flex items-center gap-1.5"
+            className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer inline-flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Create Week 1</span>
           </button>
         </div>
       ) : (
-        <div className="bg-[#161616] border border-[#1F1F1F] rounded-xs p-6 space-y-6">
+        <div className="bg-[#161616] border border-[#1F1F1F] rounded-2xl p-6 space-y-6">
           {/* Header of selected week */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#1F1F1F] pb-4">
             <div>
@@ -436,15 +490,15 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                   {selectedWeek.title}
                 </h3>
                 {selectedWeek.status === 'published' ? (
-                  <span className="bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs">
+                  <span className="bg-[#22C55E]/10 text-[#22C55E] border border-[#22C55E]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
                     PUBLISHED ✓
                   </span>
                 ) : selectedWeek.status === 'draft' ? (
-                  <span className="bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs">
+                  <span className="bg-[#D4AF37]/10 text-[#D4AF37] border border-[#D4AF37]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
                     DRAFT (Review &amp; Publish)
                   </span>
                 ) : (
-                  <span className="bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-xs">
+                  <span className="bg-[#EF4444]/10 text-[#EF4444] border border-[#EF4444]/30 font-mono text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md">
                     AWAITING SLIDES
                   </span>
                 )}
@@ -459,7 +513,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 <button
                   id="preview-student-quiz-btn"
                   onClick={() => setPreviewModalOpen(true)}
-                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-xs text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span>Preview Student Quiz</span>
@@ -469,7 +523,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
               <button
                 id={`del-week-${selectedWeek.id}`}
                 onClick={() => handleDeleteWeek(selectedWeek.id)}
-                className={`px-3 py-1.5 rounded-xs text-xs font-mono uppercase tracking-wider border transition cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider border transition cursor-pointer ${
                   armedDeleteWeekId === selectedWeek.id
                     ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse'
                     : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444]'
@@ -482,7 +536,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
           {/* Error Banner */}
           {errorMessage && (
-            <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 rounded-r-xs text-xs text-[#EF4444] flex items-center gap-2">
+            <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 rounded-r-lg text-xs text-[#EF4444] flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -490,7 +544,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
           {/* Processing Banner */}
           {isProcessing && (
-            <div className="bg-[#121212] border border-[#D4AF37]/40 p-8 rounded-xs text-center space-y-3 shadow-[0_0_25px_rgba(212,175,55,0.1)]">
+            <div className="bg-[#121212] border border-[#D4AF37]/40 p-8 rounded-2xl text-center space-y-3 shadow-[0_0_25px_rgba(212,175,55,0.1)]">
               <RefreshCw className="w-8 h-8 text-[#D4AF37] animate-spin mx-auto" />
               <h4 className="font-serif italic text-lg text-white">
                 Gemini 3.7 Flash AI Curriculum Engine<span className="text-[#D4AF37]">.</span>
@@ -514,7 +568,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                     handlePptxUpload(e.dataTransfer.files[0], selectedWeek);
                   }
                 }}
-                className="border border-dashed border-[#1F1F1F] hover:border-[#D4AF37]/60 rounded-xs p-8 md:p-12 text-center bg-[#121212] hover:bg-[#161616] transition-all duration-300 cursor-pointer flex flex-col items-center justify-center group shadow-lg"
+                className="border border-dashed border-[#1F1F1F] hover:border-[#D4AF37]/60 rounded-2xl p-8 md:p-12 text-center bg-[#121212] hover:bg-[#161616] transition-all duration-300 cursor-pointer flex flex-col items-center justify-center group shadow-lg"
               >
                 <div className="w-14 h-14 rounded-full bg-[#161616] border border-[#1F1F1F] flex items-center justify-center text-[#D4AF37] mb-3 group-hover:scale-105 transition-transform shadow-[0_0_15px_rgba(212,175,55,0.1)]">
                   <FileUp className="w-7 h-7" />
@@ -528,7 +582,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
                 <label
                   htmlFor="file-upload-input"
-                  className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer inline-flex items-center gap-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                  className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer inline-flex items-center gap-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                 >
                   <Upload className="w-4 h-4 text-[#0A0A0A]" />
                   <span>Choose .PPTX File</span>
@@ -549,7 +603,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
               {/* Alternative Quick-Start Options */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* AI Topic Prompt */}
-                <div className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-xs p-5 flex flex-col justify-between">
+                <div className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-5 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-[#D4AF37] mb-1.5">
                       <Wand2 className="w-3.5 h-3.5" />
@@ -568,7 +622,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                       playClickSound();
                       setShowTopicModal(true);
                     }}
-                    className="w-full py-2.5 bg-[#161616] border border-[#1F1F1F] hover:border-[#D4AF37] text-white hover:text-[#D4AF37] rounded-xs text-xs font-mono uppercase tracking-widest cursor-pointer flex items-center justify-center gap-1.5 transition"
+                    className="w-full py-2.5 bg-[#161616] border border-[#1F1F1F] hover:border-[#D4AF37] text-white hover:text-[#D4AF37] rounded-lg text-xs font-mono uppercase tracking-widest cursor-pointer flex items-center justify-center gap-1.5 transition"
                   >
                     <Sparkles className="w-3.5 h-3.5 text-[#D4AF37]" />
                     <span>Generate via AI Prompt</span>
@@ -576,7 +630,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 </div>
 
                 {/* Sample Prebuilt Decks */}
-                <div className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-xs p-5 flex flex-col justify-between">
+                <div className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-5 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center gap-2 text-[10px] font-mono font-bold uppercase tracking-[0.2em] text-[#22C55E] mb-1.5">
                       <Layers className="w-3.5 h-3.5" />
@@ -592,13 +646,13 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleLoadSampleDeck(0, selectedWeek)}
-                      className="flex-1 py-2 px-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-xs text-[11px] font-mono uppercase tracking-wider cursor-pointer text-center"
+                      className="flex-1 py-2 px-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-lg text-[11px] font-mono uppercase tracking-wider cursor-pointer text-center"
                     >
                       Astronomy Deck
                     </button>
                     <button
                       onClick={() => handleLoadSampleDeck(1, selectedWeek)}
-                      className="flex-1 py-2 px-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-xs text-[11px] font-mono uppercase tracking-wider cursor-pointer text-center"
+                      className="flex-1 py-2 px-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-lg text-[11px] font-mono uppercase tracking-wider cursor-pointer text-center"
                     >
                       History Deck
                     </button>
@@ -612,7 +666,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
           {!isProcessing && selectedWeek.quiz.length > 0 && (
             <div className="space-y-6">
               {/* Publication / Status Action Bar */}
-              <div className="bg-[#121212] border border-[#1F1F1F] p-5 rounded-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="bg-[#121212] border border-[#1F1F1F] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] block">
                     Current Module State
@@ -624,12 +678,29 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="flex flex-wrap items-center gap-2 self-end sm:self-auto">
+                  {selectedWeek && state.students.filter((s) => Boolean((state.results[s.id] || {})[selectedWeek.id])).length > 0 && (
+                    <button
+                      id="clear-module-scores-btn"
+                      onClick={() => {
+                        playClickSound();
+                        setShowClearWeekScoresModal(true);
+                      }}
+                      className="px-3.5 py-2 bg-[#161616] hover:bg-[#201010] border border-[#2A2A2A] hover:border-[#EF4444]/60 text-[#AAAAAA] hover:text-[#EF4444] rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                      title="Clear all student scores for this quiz module"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5 text-[#EF4444]" />
+                      <span>
+                        Clear Scores ({state.students.filter((s) => Boolean((state.results[s.id] || {})[selectedWeek.id])).length})
+                      </span>
+                    </button>
+                  )}
+
                   {selectedWeek.status === 'published' ? (
                     <button
                       id="unpublish-week-btn"
                       onClick={() => handlePublishWeek(selectedWeek, 'draft')}
-                      className="px-4 py-2 bg-[#161616] border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xs text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+                      className="px-4 py-2 bg-[#161616] border border-[#EF4444]/40 text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer"
                     >
                       Unpublish (Revert to Draft)
                     </button>
@@ -637,7 +708,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                     <button
                       id="publish-week-btn"
                       onClick={() => handlePublishWeek(selectedWeek, 'published')}
-                      className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-widest transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)] flex items-center gap-2"
+                      className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-widest transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)] flex items-center gap-2"
                     >
                       <Send className="w-3.5 h-3.5 text-[#0A0A0A]" />
                       <span>Publish Check-In to Students</span>
@@ -660,11 +731,11 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 {selectedWeek.quiz.map((q, qi) => (
                   <div
                     key={q.id || qi}
-                    className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-5 space-y-3"
+                    className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-5 space-y-3"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold bg-[#0A0A0A] border border-[#1F1F1F] text-[#D4AF37] px-2 py-0.5 rounded-xs">
+                        <span className="font-mono text-xs font-bold bg-[#0A0A0A] border border-[#1F1F1F] text-[#D4AF37] px-2 py-0.5 rounded-md">
                           Q{qi + 1}
                         </span>
                         <span className="text-[10px] text-[#888888] font-mono uppercase tracking-wider">
@@ -677,7 +748,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                       type="text"
                       value={q.question}
                       onChange={(e) => updateQuestionText(qi, e.target.value)}
-                      className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[#D4AF37] font-medium"
+                      className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#D4AF37] font-medium"
                     />
 
                     {/* Options Grid */}
@@ -687,7 +758,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                         return (
                           <div
                             key={oi}
-                            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xs border transition ${
+                            className={`flex items-center gap-2.5 px-3.5 py-2 rounded-xl border transition ${
                               isCorrect
                                 ? 'bg-[#22C55E]/10 border-[#22C55E]/40'
                                 : 'bg-[#161616] border-[#1F1F1F] hover:border-[#333333]'
@@ -711,7 +782,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                               className="flex-1 bg-transparent border-none text-sm text-white focus:outline-none"
                             />
                             {isCorrect && (
-                              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#22C55E] bg-[#22C55E]/20 px-1.5 py-0.5 rounded-xs">
+                              <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-[#22C55E] bg-[#22C55E]/20 px-1.5 py-0.5 rounded-md">
                                 Correct Key
                               </span>
                             )}
@@ -721,7 +792,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                     </div>
 
                     {q.explanation && (
-                      <div className="text-xs text-[#888888] bg-[#161616] p-2.5 rounded-xs border border-[#1F1F1F] font-light">
+                      <div className="text-xs text-[#888888] bg-[#161616] p-2.5 rounded-xl border border-[#1F1F1F] font-light">
                         <span className="font-mono text-[#D4AF37] uppercase text-[10px] tracking-wider block mb-0.5">Explanation:</span>
                         {q.explanation}
                       </div>
@@ -737,7 +808,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
       {/* AI Topic Prompt Modal */}
       {showTopicModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4">
+          <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-4">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-[#D4AF37]" />
               <h3 className="font-serif italic text-2xl text-white">
@@ -758,7 +829,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 value={topicPrompt}
                 onChange={(e) => setTopicPrompt(e.target.value)}
                 placeholder="e.g. World War II: The European Theater, 1939–1945"
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[#D4AF37]"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#D4AF37]"
                 autoFocus
               />
             </div>
@@ -767,7 +838,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
               <button
                 type="button"
                 onClick={() => setShowTopicModal(false)}
-                className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
               >
                 Cancel
               </button>
@@ -775,7 +846,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                 type="button"
                 id="confirm-topic-generation-btn"
                 onClick={handleGenerateFromTopic}
-                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-xs text-xs font-mono uppercase tracking-widest cursor-pointer flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-lg text-xs font-mono uppercase tracking-widest cursor-pointer flex items-center gap-1.5"
               >
                 <Wand2 className="w-3.5 h-3.5 text-[#0A0A0A]" />
                 <span>Generate Curriculum &amp; Quiz</span>
@@ -788,7 +859,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
       {/* Student Quiz Preview Modal */}
       {previewModalOpen && selectedWeek && (
         <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50">
-          <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl">
+          <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-5 border-b border-[#1F1F1F] flex items-center justify-between bg-[#161616]">
               <div>
                 <span className="text-[9px] font-mono text-[#D4AF37] font-bold uppercase tracking-[0.2em] block">
@@ -800,7 +871,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
               </div>
               <button
                 onClick={() => setPreviewModalOpen(false)}
-                className="px-3.5 py-1.5 bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
               >
                 Close Preview
               </button>
@@ -808,7 +879,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
             <div className="p-6 overflow-y-auto space-y-6 bg-[#0A0A0A]">
               {selectedWeek.quiz.map((q, qi) => (
-                <div key={qi} className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-5">
+                <div key={qi} className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-5">
                   <p className="font-medium text-sm text-white mb-3">
                     {qi + 1}. {q.question}
                   </p>
@@ -816,7 +887,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                     {q.options.map((opt, oi) => (
                       <div
                         key={oi}
-                        className="px-3.5 py-2 bg-[#161616] border border-[#1F1F1F] rounded-xs text-xs text-[#E0E0E0] flex items-center gap-2.5"
+                        className="px-3.5 py-2 bg-[#161616] border border-[#1F1F1F] rounded-xl text-xs text-[#E0E0E0] flex items-center gap-2.5"
                       >
                         <span className="font-mono font-bold text-[#888888]">
                           {String.fromCharCode(65 + oi)}.
@@ -827,6 +898,54 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Clear Week Scores Confirmation Modal */}
+      {showClearWeekScoresModal && selectedWeek && (
+        <div className="fixed inset-0 bg-black/85 flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-5">
+            <div className="flex items-center gap-3 text-[#EF4444]">
+              <div className="w-10 h-10 rounded-full bg-[#EF4444]/10 border border-[#EF4444]/30 flex items-center justify-center shrink-0">
+                <AlertOctagon className="w-5 h-5 text-[#EF4444]" />
+              </div>
+              <div>
+                <h4 className="font-serif italic text-lg text-white">
+                  Clear Quiz Scores?
+                </h4>
+                <p className="text-[11px] font-mono text-[#888888]">
+                  Module: {selectedWeek.title}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#161616] border border-[#1F1F1F] rounded-xl p-4 space-y-2 text-xs font-mono text-[#AAAAAA]">
+              <p>
+                This will delete all student submissions for <strong className="text-white">{selectedWeek.title}</strong>.
+              </p>
+              <p className="text-[#888888]">
+                Students will be able to log in with their PINs and immediately retake this check-in.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowClearWeekScoresModal(false)}
+                className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-[#AAAAAA] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="confirm-clear-week-scores-btn"
+                onClick={handlePerformClearWeekScores}
+                className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white font-medium rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5 shadow-[0_0_15px_rgba(239,68,68,0.3)]"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span>Confirm &amp; Clear Scores</span>
+              </button>
             </div>
           </div>
         </div>

@@ -75,7 +75,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               <h1 className="font-serif italic text-lg md:text-xl text-white tracking-tight leading-none">
                 The Weekly Ledger<span className="text-[#888888]">.</span>
               </h1>
-              <span className="hidden sm:inline-block text-[9px] font-mono tracking-widest text-black font-bold uppercase bg-[#D4AF37] px-1.5 py-0.5 rounded-xs">
+              <span className="hidden sm:inline-block text-[9px] font-mono tracking-widest text-black font-bold uppercase bg-[#D4AF37] px-1.5 py-0.5 rounded-md">
                 v2.0
               </span>
             </div>
@@ -89,7 +89,7 @@ export const Topbar: React.FC<TopbarProps> = ({
         <div className="flex items-center gap-2 md:gap-3 text-xs">
           {/* Active Teacher Badge */}
           {currentTeacher && (
-            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-sm text-[#E0E0E0]">
+            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-md text-[#E0E0E0]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
               <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono">
                 {currentTeacher.name}
@@ -99,12 +99,12 @@ export const Topbar: React.FC<TopbarProps> = ({
 
           {/* Active Student Badge */}
           {currentStudent && (
-            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-sm text-[#E0E0E0]">
+            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-md text-[#E0E0E0]">
               <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E]" />
               <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono flex items-center gap-1.5">
                 <span>{currentStudent.name}</span>
                 <span>&middot;</span>
-                <span className="text-black font-bold bg-[#D4AF37] px-1.5 py-0.2 rounded-xs">PIN: {currentStudent.pin}</span>
+                <span className="text-black font-bold bg-[#D4AF37] px-1.5 py-0.5 rounded-md">PIN: {currentStudent.pin}</span>
               </span>
             </div>
           )}
@@ -119,7 +119,7 @@ export const Topbar: React.FC<TopbarProps> = ({
               onThemeChange(nextTheme);
               saveColorScheme(nextTheme);
             }}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm border transition cursor-pointer text-[10px] uppercase tracking-wider font-mono select-none ${
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition cursor-pointer text-[10px] uppercase tracking-wider font-mono select-none ${
               isDayMode(currentTheme)
                 ? 'bg-[#FEF3C7] text-black font-bold border-[#FDE68A] hover:bg-[#FDE68A]'
                 : 'bg-[#161616] text-[#E0E0E0] border-[#2A2A2A] hover:border-[#444444] hover:text-white'
@@ -153,7 +153,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 playClickSound();
                 onToggleMovableStamp();
               }}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm border transition cursor-pointer text-[10px] uppercase tracking-widest ${
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition cursor-pointer text-[10px] uppercase tracking-widest ${
                 showMovableStamp
                   ? 'bg-[#D4AF37] text-black font-bold border-[#D4AF37]'
                   : 'bg-[#121212] text-[#888888] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -169,7 +169,7 @@ export const Topbar: React.FC<TopbarProps> = ({
           <button
             id="sound-toggle-btn"
             onClick={() => onToggleSound()}
-            className="p-1.5 rounded-sm bg-[#121212] text-[#888888] border border-[#1F1F1F] hover:text-white hover:border-[#333333] transition cursor-pointer"
+            className="p-2 rounded-lg bg-[#121212] text-[#888888] border border-[#1F1F1F] hover:text-white hover:border-[#333333] transition cursor-pointer"
             title={soundEnabled ? 'Mute sound effects' : 'Enable sound effects'}
           >
             {soundEnabled ? <Volume2 className="w-4 h-4 text-white" /> : <VolumeX className="w-4 h-4 text-[#555555]" />}
@@ -185,7 +185,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                   onResetData();
                 }
               }}
-              className="hidden sm:flex items-center gap-1 px-2.5 py-1.5 rounded-sm border border-[#1F1F1F] bg-[#121212] text-[#666666] hover:text-white hover:border-[#333333] transition cursor-pointer text-[10px] uppercase tracking-widest"
+              className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-lg border border-[#1F1F1F] bg-[#121212] text-[#666666] hover:text-white hover:border-[#333333] transition cursor-pointer text-[10px] uppercase tracking-widest"
               title="Reset sample roster, quizzes, and class results"
             >
               <RefreshCw className="w-3 h-3" />
@@ -198,7 +198,7 @@ export const Topbar: React.FC<TopbarProps> = ({
             <button
               id="logout-btn"
               onClick={handleLogoutAction}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-sm bg-[#161616] border border-[#2A2A2A] text-[#E0E0E0] hover:text-[#EF4444] hover:border-[#EF4444]/60 transition cursor-pointer text-[10px] uppercase tracking-widest font-semibold shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161616] border border-[#2A2A2A] text-[#E0E0E0] hover:text-[#EF4444] hover:border-[#EF4444]/60 transition cursor-pointer text-[10px] uppercase tracking-widest font-semibold shadow-xs"
               title="Log out of current account"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -213,7 +213,7 @@ export const Topbar: React.FC<TopbarProps> = ({
                 playClickSound();
                 onNavigate('landing');
               }}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-sm bg-[#121212] border border-[#1F1F1F] text-[#888888] hover:text-white hover:border-[#333333] transition cursor-pointer text-[10px] uppercase tracking-widest"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#121212] border border-[#1F1F1F] text-[#888888] hover:text-white hover:border-[#333333] transition cursor-pointer text-[10px] uppercase tracking-widest"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Home</span>

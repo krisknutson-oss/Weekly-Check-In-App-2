@@ -104,7 +104,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
       {inkMarks.map((mark) => (
         <div
           key={mark.id}
-          className="fixed pointer-events-none z-30 font-mono text-xs font-bold uppercase px-3 py-1.5 border border-dashed border-[#D4AF37] text-[#D4AF37] bg-[#0A0A0A]/90 shadow-[0_0_15px_rgba(212,175,55,0.2)] rounded-xs transition-opacity duration-700 tracking-wider"
+          className="fixed pointer-events-none z-30 font-mono text-xs font-bold uppercase px-3 py-1.5 border border-dashed border-[#D4AF37] text-[#D4AF37] bg-[#0A0A0A]/90 shadow-[0_0_15px_rgba(212,175,55,0.2)] rounded-lg transition-opacity duration-700 tracking-wider"
           style={{
             left: `${mark.x}px`,
             top: `${mark.y}px`,
@@ -119,7 +119,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
       <div
         ref={stampRef}
         id="movable-classroom-stamp"
-        className="fixed z-40 select-none cursor-grab active:cursor-grabbing bg-[#121212] border border-[#1F1F1F] hover:border-[#D4AF37]/50 rounded-sm shadow-2xl p-3.5 flex flex-col gap-2.5 w-52 text-[#E0E0E0]"
+        className="fixed z-40 select-none cursor-grab active:cursor-grabbing bg-[#121212] border border-[#1F1F1F] hover:border-[#D4AF37]/50 rounded-xl shadow-2xl p-3.5 flex flex-col gap-2.5 w-52 text-[#E0E0E0]"
         style={{
           left: `${pos.x}px`,
           top: `${pos.y}px`,
@@ -139,7 +139,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
                 e.stopPropagation();
                 onClose();
               }}
-              className="text-[#666666] hover:text-white p-0.5 rounded cursor-pointer"
+              className="text-[#666666] hover:text-white p-0.5 rounded-md cursor-pointer"
               title="Close stamp widget"
             >
               <X className="w-3.5 h-3.5" />
@@ -153,7 +153,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
             e.stopPropagation();
             leaveStamp();
           }}
-          className="border border-dashed border-[#D4AF37] bg-[#161616] hover:bg-[#1A1A1A] p-2.5 text-center rounded-xs text-[#D4AF37] transition cursor-pointer group shadow-[0_0_10px_rgba(212,175,55,0.08)]"
+          className="border border-dashed border-[#D4AF37] bg-[#161616] hover:bg-[#1A1A1A] p-2.5 text-center rounded-lg text-[#D4AF37] transition cursor-pointer group shadow-[0_0_10px_rgba(212,175,55,0.08)]"
           title="Click or press Spacebar to stamp"
         >
           <div className="font-mono font-bold text-xs tracking-wider uppercase group-hover:scale-105 transition-transform flex items-center justify-center gap-1.5">
@@ -171,7 +171,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
             id="stamp-text-select"
             value={stampText}
             onChange={(e) => setStampText(e.target.value)}
-            className="w-full text-[10px] font-mono py-1 px-2 bg-[#161616] border border-[#1F1F1F] rounded-xs text-[#E0E0E0] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
+            className="w-full text-[10px] font-mono py-1 px-2 bg-[#161616] border border-[#1F1F1F] rounded-md text-[#E0E0E0] focus:outline-none focus:border-[#D4AF37] cursor-pointer"
           >
             <option value="APPROVED ✓">APPROVED ✓</option>
             <option value="EXCELLENT ★">EXCELLENT ★</option>
@@ -181,7 +181,7 @@ export const MovableStamp: React.FC<MovableStampProps> = ({ onClose }) => {
           </select>
         </div>
 
-        <div className="text-[9px] text-[#666666] font-mono text-center leading-tight bg-[#161616] border border-[#1F1F1F] py-1 rounded-xs uppercase tracking-wider">
+        <div className="text-[9px] text-[#666666] font-mono text-center leading-tight bg-[#161616] border border-[#1F1F1F] py-1 rounded-md uppercase tracking-wider">
           Move with <span className="text-[#D4AF37]">Arrow Keys</span>
         </div>
 

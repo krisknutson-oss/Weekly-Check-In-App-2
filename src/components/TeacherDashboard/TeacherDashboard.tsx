@@ -147,7 +147,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
   return (
     <div className="max-w-6xl mx-auto py-6 px-4 space-y-6">
       {/* Classroom Top Banner */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#121212] border border-[#1F1F1F] p-5 rounded-sm shadow-xl relative">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-[#121212] border border-[#1F1F1F] p-5 rounded-2xl shadow-xl relative">
         <div className="flex items-center gap-3.5">
           <div className="w-11 h-11 rounded-full border border-[var(--gold)]/50 bg-[#161616] flex items-center justify-center font-bold font-serif italic text-lg text-[var(--gold)] shadow-[0_0_15px_rgba(212,175,55,0.15)] shrink-0">
             <School className="w-5 h-5" />
@@ -160,7 +160,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               </h2>
 
               {state.classCode && (
-                <span className="text-[10px] font-mono uppercase tracking-wider bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/30 px-2 py-0.5 rounded-xs">
+                <span className="text-[10px] font-mono uppercase tracking-wider bg-[var(--gold)]/10 text-[var(--gold)] border border-[var(--gold)]/30 px-2 py-0.5 rounded-md">
                   Code: {state.classCode}
                 </span>
               )}
@@ -182,7 +182,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   playClickSound();
                   setShowClassMenu(!showClassMenu);
                 }}
-                className="inline-flex items-center gap-1.5 text-[11px] text-[var(--gold)] bg-[#1A1A1A] border border-[var(--gold)]/30 hover:border-[var(--gold)] px-2.5 py-0.5 rounded-xs transition cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-[11px] text-[var(--gold)] bg-[#1A1A1A] border border-[var(--gold)]/30 hover:border-[var(--gold)] px-2.5 py-0.5 rounded-lg transition cursor-pointer"
               >
                 <span>My Classes ({teacherClasses.length})</span>
                 <ChevronDown className="w-3 h-3 text-[var(--gold)]" />
@@ -193,7 +193,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
         <div className="flex items-center gap-2.5 self-end lg:self-auto flex-wrap">
           {/* Culminating Objective Widget */}
-          <div className="text-left sm:text-right text-xs font-mono text-[#888888] bg-[#161616] border border-[#1F1F1F] px-3.5 py-2 rounded-xs">
+          <div className="text-left sm:text-right text-xs font-mono text-[#888888] bg-[#161616] border border-[#1F1F1F] px-3.5 py-2 rounded-xl">
             <span className="text-[9px] uppercase tracking-widest block text-[var(--gold)] font-semibold">
               Culminating Objective
             </span>
@@ -215,7 +215,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               setEditCulminatingTitle(state.culminatingActivityTitle);
               setShowEditClassModal(true);
             }}
-            className="p-2 bg-[#161616] hover:bg-[#202020] border border-[#262626] hover:border-[#444444] text-[#AAAAAA] hover:text-white rounded-xs transition cursor-pointer"
+            className="p-2 bg-[#161616] hover:bg-[#202020] border border-[#262626] hover:border-[#444444] text-[#AAAAAA] hover:text-white rounded-lg transition cursor-pointer"
             title="Edit Class Settings & Goals"
           >
             <Settings2 className="w-4 h-4" />
@@ -229,7 +229,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 playClickSound();
                 onLogout();
               }}
-              className="px-3 py-2 bg-[#161616] hover:bg-[#201010] border border-[#2A2A2A] hover:border-[#EF4444]/60 text-[#AAAAAA] hover:text-[#EF4444] rounded-xs text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
+              className="px-3 py-2 bg-[#161616] hover:bg-[#201010] border border-[#2A2A2A] hover:border-[#EF4444]/60 text-[#AAAAAA] hover:text-[#EF4444] rounded-lg text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
               title="Log out of isolated educator account"
             >
               <LogOut className="w-3.5 h-3.5" />
@@ -240,7 +240,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
 
         {/* Classes Popover Menu */}
         {showClassMenu && (
-          <div className="absolute left-4 top-20 sm:left-16 z-30 w-84 bg-[#161616] border border-[#2A2A2A] rounded-sm p-4 shadow-2xl space-y-3 animate-in fade-in zoom-in-95">
+          <div className="absolute left-4 top-20 sm:left-16 z-30 w-84 bg-[#161616] border border-[#2A2A2A] rounded-2xl p-4 shadow-2xl space-y-3 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b border-[#222222] pb-2">
               <span className="text-[10px] font-mono uppercase tracking-widest text-[var(--gold)] font-semibold flex items-center gap-1.5">
                 <School className="w-3.5 h-3.5" />
@@ -261,7 +261,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 return (
                   <div
                     key={cls.id}
-                    className={`p-2.5 rounded-xs border text-xs flex items-center justify-between gap-2 cursor-pointer transition ${
+                    className={`p-2.5 rounded-xl border text-xs flex items-center justify-between gap-2 cursor-pointer transition ${
                       isActive
                         ? 'bg-[#1C1C1C] border-[var(--gold)] text-white shadow-xs'
                         : 'bg-[#101010] border-[#222222] text-[#888888] hover:bg-[#161616] hover:text-white'
@@ -272,7 +272,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                       <div className="font-medium text-white flex items-center gap-1.5 truncate">
                         <span className="truncate">{cls.className}</span>
                         {isActive && (
-                          <span className="text-[9px] bg-[var(--gold)]/20 text-[var(--gold)] px-1 py-0.2 rounded-xs font-mono shrink-0">
+                          <span className="text-[9px] bg-[var(--gold)]/20 text-[var(--gold)] px-1.5 py-0.5 rounded-md font-mono shrink-0">
                             Active
                           </span>
                         )}
@@ -311,7 +311,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   setShowCreateClassModal(true);
                   setShowClassMenu(false);
                 }}
-                className="w-full py-2 px-3 bg-[var(--gold)]/10 hover:bg-[var(--gold)]/20 border border-[var(--gold)]/40 text-[var(--gold)] rounded-xs text-[11px] font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition font-semibold"
+                className="w-full py-2 px-3 bg-[var(--gold)]/10 hover:bg-[var(--gold)]/20 border border-[var(--gold)]/40 text-[var(--gold)] rounded-lg text-[11px] font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition font-semibold"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Create New Class</span>
@@ -325,7 +325,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     setShowClassMenu(false);
                     onSwitchAccount();
                   }}
-                  className="w-full py-1.5 px-2.5 bg-[#121212] hover:bg-[#1F1F1F] border border-[#222222] hover:border-[var(--gold)]/50 text-[#AAAAAA] hover:text-white rounded-xs text-[10px] font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition"
+                  className="w-full py-1.5 px-2.5 bg-[#121212] hover:bg-[#1F1F1F] border border-[#222222] hover:border-[var(--gold)]/50 text-[#AAAAAA] hover:text-white rounded-lg text-[10px] font-mono uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition"
                 >
                   <ArrowRightLeft className="w-3 h-3 text-[var(--gold)]" />
                   <span>Switch Educator Account</span>
@@ -339,7 +339,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       {/* MODAL 1: Create New Class */}
       {showCreateClassModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-[#141414] border border-[#262626] rounded-sm p-6 max-w-lg w-full shadow-2xl space-y-4 text-left">
+          <div className="bg-[#141414] border border-[#262626] rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-[#222222] pb-3">
               <div className="flex items-center gap-2 text-white font-serif italic text-xl">
                 <School className="w-5 h-5 text-[var(--gold)]" />
@@ -368,7 +368,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   value={newClassName}
                   onChange={(e) => setNewClassName(e.target.value)}
                   placeholder="e.g. Period 1: AP European History"
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   required
                   autoFocus
                 />
@@ -384,7 +384,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     value={newSubject}
                     onChange={(e) => setNewSubject(e.target.value)}
                     placeholder="e.g. History, Biology"
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   />
                 </div>
                 <div>
@@ -396,7 +396,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     value={newPeriod}
                     onChange={(e) => setNewPeriod(e.target.value)}
                     placeholder="e.g. Period 1, Block B"
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   />
                 </div>
               </div>
@@ -410,7 +410,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   value={newCulminatingTitle}
                   onChange={(e) => setNewCulminatingTitle(e.target.value)}
                   placeholder="e.g. Fall Comprehensive Culminating Exam & Socratic Defense"
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
               </div>
 
@@ -422,7 +422,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   <select
                     value={newCopyRosterFromClassId}
                     onChange={(e) => setNewCopyRosterFromClassId(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
                   >
                     <option value="">None &mdash; Start with empty roster</option>
                     {teacherClasses.map((cls) => (
@@ -441,13 +441,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCreateClassModal(false)}
-                  className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#222222] border border-[#2A2A2A] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#222222] border border-[#2A2A2A] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-wider rounded-xs text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                  className="px-5 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-wider rounded-lg text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                 >
                   Create Class
                 </button>
@@ -460,7 +460,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
       {/* MODAL 2: Edit Class Settings */}
       {showEditClassModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center z-50 p-4">
-          <div className="bg-[#141414] border border-[#262626] rounded-sm p-6 max-w-lg w-full shadow-2xl space-y-4 text-left">
+          <div className="bg-[#141414] border border-[#262626] rounded-2xl p-6 max-w-lg w-full shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between border-b border-[#222222] pb-3">
               <div className="flex items-center gap-2 text-white font-serif italic text-xl">
                 <Settings2 className="w-5 h-5 text-[var(--gold)]" />
@@ -484,7 +484,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   type="text"
                   value={editClassName}
                   onChange={(e) => setEditClassName(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   required
                 />
               </div>
@@ -498,7 +498,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     type="text"
                     value={editSubject}
                     onChange={(e) => setEditSubject(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   />
                 </div>
                 <div>
@@ -509,7 +509,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                     type="text"
                     value={editPeriod}
                     onChange={(e) => setEditPeriod(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                   />
                 </div>
               </div>
@@ -522,7 +522,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   type="text"
                   value={editCulminatingTitle}
                   onChange={(e) => setEditCulminatingTitle(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
               </div>
 
@@ -534,7 +534,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                   value={editUnitGoal}
                   onChange={(e) => setEditUnitGoal(e.target.value)}
                   rows={2}
-                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#262626] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
               </div>
 
@@ -542,13 +542,13 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowEditClassModal(false)}
-                  className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#222222] border border-[#2A2A2A] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                  className="px-4 py-2 bg-[#1A1A1A] hover:bg-[#222222] border border-[#2A2A2A] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-wider rounded-xs text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                  className="px-5 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-[#0A0A0A] font-mono font-semibold uppercase tracking-wider rounded-lg text-xs cursor-pointer transition shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                 >
                   Save Changes
                 </button>
@@ -567,7 +567,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               playClickSound();
               setActiveTab('students');
             }}
-            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xs ${
+            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xl ${
               activeTab === 'students'
                 ? 'bg-[#121212] text-white font-bold border-white/50 border-b-2 border-b-[#121212] -mb-px'
                 : 'bg-[#0E0E0E] text-[#666666] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -583,7 +583,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               playClickSound();
               setActiveTab('weeks');
             }}
-            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xs ${
+            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xl ${
               activeTab === 'weeks'
                 ? 'bg-[#121212] text-white font-bold border-white/50 border-b-2 border-b-[#121212] -mb-px'
                 : 'bg-[#0E0E0E] text-[#666666] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -599,7 +599,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               playClickSound();
               setActiveTab('results');
             }}
-            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xs ${
+            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xl ${
               activeTab === 'results'
                 ? 'bg-[#121212] text-white font-bold border-white/50 border-b-2 border-b-[#121212] -mb-px'
                 : 'bg-[#0E0E0E] text-[#666666] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -615,7 +615,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
               playClickSound();
               setActiveTab('faculty');
             }}
-            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xs ${
+            className={`px-5 py-3 font-mono text-xs uppercase tracking-widest transition cursor-pointer flex items-center gap-2 border-t border-x rounded-t-xl ${
               activeTab === 'faculty'
                 ? 'bg-[#121212] text-white font-bold border-white/50 border-b-2 border-b-[#121212] -mb-px'
                 : 'bg-[#0E0E0E] text-[#666666] border-[#1F1F1F] hover:text-white hover:border-[#333333]'
@@ -627,7 +627,7 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
         </div>
 
         {/* Tab Panel Canvas */}
-        <div className="bg-[#121212] border border-[#1F1F1F] border-t-0 rounded-b-sm p-6 sm:p-8 shadow-xl">
+        <div className="bg-[#121212] border border-[#1F1F1F] border-t-0 rounded-b-2xl p-6 sm:p-8 shadow-xl">
           {activeTab === 'students' && (
             <StudentsTab
               state={state}
@@ -640,7 +640,9 @@ export const TeacherDashboard: React.FC<TeacherDashboardProps> = ({
             <WeeksTab state={state} onUpdateState={onUpdateState} />
           )}
 
-          {activeTab === 'results' && <ResultsTab state={state} />}
+          {activeTab === 'results' && (
+            <ResultsTab state={state} onUpdateState={onUpdateState} />
+          )}
 
           {activeTab === 'faculty' && (
             <FacultyTab

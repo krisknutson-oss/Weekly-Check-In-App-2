@@ -36,7 +36,7 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col items-center justify-center p-6 text-center">
-          <div className="max-w-md bg-[#121212] border border-[#1F1F1F] p-8 rounded-sm shadow-2xl">
+          <div className="max-w-md bg-[#121212] border border-[#1F1F1F] p-8 rounded-2xl shadow-2xl">
             <h1 className="font-serif italic text-2xl mb-3 text-[#D4AF37]">
               Something unexpected occurred.
             </h1>
@@ -45,7 +45,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </p>
             <button
               onClick={this.handleReset}
-              className="px-5 py-2.5 bg-[#D4AF37] text-black font-bold font-mono text-xs uppercase tracking-widest rounded-xs hover:bg-[#E5C158] transition cursor-pointer"
+              className="px-5 py-2.5 bg-[#D4AF37] text-black font-bold font-mono text-xs uppercase tracking-widest rounded-lg hover:bg-[#E5C158] transition cursor-pointer"
             >
               Reset &amp; Reload Application
             </button>

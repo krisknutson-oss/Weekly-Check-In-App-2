@@ -60,14 +60,91 @@ export async function syncClassToCloud(classData: ClassroomData): Promise<void> 
       classRef,
       {
         ...classData,
+        results: classData.results || {},
         updatedAt: Date.now(),
-      },
-      { merge: true }
+      }
     );
     setSyncStatus('synced');
   } catch (err) {
     console.error('Failed to sync class to Firestore:', err);
     setSyncStatus('error');
+  }
+}
+
+/**
+ * Clear a specific score or all scores for a student in Firestore
+ */
+export async function clearStudentScoreInCloud(classId: string, studentId: string, weekId?: string): Promise<void> {
+  if (!classId || !studentId) return;
+  try {
+    const classRef = doc(db, CLASSES_COLLECTION, classId);
+    const snap = await getDoc(classRef);
+    if (snap.exists()) {
+      const currentData = snap.data() as ClassroomData;
+      const results = { ...(currentData.results || {}) };
+      if (results[studentId]) {
+        if (weekId) {
+          const studentSubs = { ...results[studentId] };
+          delete studentSubs[weekId];
+          if (Object.keys(studentSubs).length === 0) {
+            delete results[studentId];
+          } else {
+            results[studentId] = studentSubs;
+          }
+        } else {
+          delete results[studentId];
+        }
+        await updateDoc(classRef, { results, updatedAt: Date.now() });
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to clear student score in Firestore:', err);
+  }
+}
+
+/**
+ * Clear all submissions for a week in Firestore
+ */
+export async function clearWeekScoresInCloud(classId: string, weekId: string): Promise<void> {
+  if (!classId || !weekId) return;
+  try {
+    const classRef = doc(db, CLASSES_COLLECTION, classId);
+    const snap = await getDoc(classRef);
+    if (snap.exists()) {
+      const currentData = snap.data() as ClassroomData;
+      const results = { ...(currentData.results || {}) };
+      let modified = false;
+      Object.keys(results).forEach((sId) => {
+        if (results[sId] && results[sId][weekId]) {
+          const studentSubs = { ...results[sId] };
+          delete studentSubs[weekId];
+          if (Object.keys(studentSubs).length === 0) {
+            delete results[sId];
+          } else {
+            results[sId] = studentSubs;
+          }
+          modified = true;
+        }
+      });
+      if (modified) {
+        await updateDoc(classRef, { results, updatedAt: Date.now() });
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to clear week scores in Firestore:', err);
+  }
+}
+
+/**
+ * Clear all scores across the classroom in Firestore
+ */
+export async function clearAllClassroomScoresInCloud(classId: string): Promise<void> {
+  if (!classId) return;
+  try {
+    const classRef = doc(db, CLASSES_COLLECTION, classId);
+    await updateDoc(classRef, { results: {}, updatedAt: Date.now() });
+  } catch (err) {
+    console.warn('Failed to clear all scores in Firestore:', err);
   }
 }
 

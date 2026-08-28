@@ -76,7 +76,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
       {/* Top Exam Header */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
         <div>
           <button
             onClick={() => {
@@ -99,14 +99,14 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
 
         {/* Progress Pill */}
         <div className="text-right self-end sm:self-auto">
-          <div className="font-mono text-xs font-semibold text-[#D4AF37] bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-xs">
+          <div className="font-mono text-xs font-semibold text-[#D4AF37] bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-lg">
             {answeredCount} / {totalQuestions} Answered
           </div>
         </div>
       </div>
 
       {/* Question Jump Ribbon */}
-      <div className="bg-[#121212] border border-[#1F1F1F] p-3 rounded-xs flex flex-wrap gap-1.5 justify-center shadow-md">
+      <div className="bg-[#121212] border border-[#1F1F1F] p-3 rounded-xl flex flex-wrap gap-1.5 justify-center shadow-md">
         {week.quiz.map((_, idx) => {
           const isAnswered = answers[idx] !== undefined;
           const isCurrent = idx === currentIdx;
@@ -119,7 +119,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
                 playClickSound();
                 setCurrentIdx(idx);
               }}
-              className={`w-7 h-7 rounded-xs text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center border ${
+              className={`w-7 h-7 rounded-md text-xs font-mono font-bold transition cursor-pointer flex items-center justify-center border ${
                 isCurrent
                   ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37] scale-110 shadow-[0_0_10px_rgba(212,175,55,0.3)]'
                   : isAnswered
@@ -136,7 +136,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 rounded-r-xs text-xs text-[#EF4444] flex items-center gap-2 font-mono">
+        <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 rounded-r-lg text-xs text-[#EF4444] flex items-center gap-2 font-mono">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
@@ -144,13 +144,13 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
 
       {/* Current Question Paper Card */}
       {currentQuestion && (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-6 sm:p-8 shadow-2xl space-y-6 relative">
+        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6 relative">
           <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-4">
-            <span className="font-mono font-bold text-xs uppercase bg-[#161616] border border-[#1F1F1F] text-[#D4AF37] px-2.5 py-1 rounded-xs tracking-wider">
+            <span className="font-mono font-bold text-xs uppercase bg-[#161616] border border-[#1F1F1F] text-[#D4AF37] px-2.5 py-1 rounded-md tracking-wider">
               Question {currentIdx + 1} of {totalQuestions}
             </span>
             <span className="text-[10px] font-mono uppercase tracking-wider text-[#666666]">
-              Press <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-xs">A</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-xs">B</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-xs">C</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-xs">D</kbd> or click
+              Press <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-sm">A</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-sm">B</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-sm">C</kbd> <kbd className="px-1.5 py-0.5 bg-[#161616] border border-[#1F1F1F] text-white rounded-sm">D</kbd> or click
             </span>
           </div>
 
@@ -170,14 +170,14 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
                   key={oi}
                   id={`choice-option-${oi}`}
                   onClick={() => selectOption(oi)}
-                  className={`p-4 rounded-xs border transition-all duration-150 cursor-pointer flex items-center gap-3.5 ${
+                  className={`p-4 rounded-xl border transition-all duration-150 cursor-pointer flex items-center gap-3.5 ${
                     isSelected
                       ? 'bg-[#161616] border-[#D4AF37] shadow-[0_0_15px_rgba(212,175,55,0.1)]'
                       : 'bg-[#0A0A0A] border-[#1F1F1F] hover:bg-[#161616] hover:border-[#333333]'
                   }`}
                 >
                   <div
-                    className={`w-7 h-7 rounded-xs flex items-center justify-center font-mono font-bold text-xs border ${
+                    className={`w-7 h-7 rounded-md flex items-center justify-center font-mono font-bold text-xs border ${
                       isSelected
                         ? 'bg-[#D4AF37] text-[#0A0A0A] border-[#D4AF37]'
                         : 'bg-[#161616] text-[#888888] border-[#1F1F1F]'
@@ -203,7 +203,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
                 playClickSound();
                 setCurrentIdx((prev) => Math.max(0, prev - 1));
               }}
-              className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] rounded-xs text-xs font-mono uppercase tracking-wider text-white disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#333333] cursor-pointer"
+              className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] rounded-lg text-xs font-mono uppercase tracking-wider text-white disabled:opacity-30 disabled:cursor-not-allowed hover:border-[#333333] cursor-pointer"
             >
               &larr; Previous
             </button>
@@ -215,7 +215,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
                   playClickSound();
                   setCurrentIdx((prev) => Math.min(totalQuestions - 1, prev + 1));
                 }}
-                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer shadow-sm"
+                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider cursor-pointer shadow-sm"
               >
                 Next &rarr;
               </button>
@@ -223,7 +223,7 @@ export const QuizTaking: React.FC<QuizTakingProps> = ({
               <button
                 id="submit-exam-answers-btn"
                 onClick={handleSubmit}
-                className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-bold uppercase tracking-widest cursor-pointer shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-2"
+                className="px-6 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-bold uppercase tracking-widest cursor-pointer shadow-[0_0_20px_rgba(212,175,55,0.3)] flex items-center gap-2"
               >
                 <Send className="w-3.5 h-3.5" />
                 <span>Submit Final Check-In</span>

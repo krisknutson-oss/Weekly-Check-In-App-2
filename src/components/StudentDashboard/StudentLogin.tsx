@@ -196,7 +196,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
       </div>
 
       {/* Class Selection Section (Multi-Class / Multi-Teacher Isolation) */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-4 sm:p-5 mb-5 shadow-xl space-y-3">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-4 sm:p-5 mb-5 shadow-xl space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <label
             htmlFor="teacher-class-select"
@@ -206,7 +206,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             <span>1. Choose Teacher &amp; Class</span>
           </label>
           {activeClassData && (
-            <span className="text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#222222] px-2 py-0.5 rounded-xs">
+            <span className="text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#222222] px-2.5 py-1 rounded-md">
               Code: <strong className="text-white">{activeClassData.classCode}</strong>
             </span>
           )}
@@ -218,7 +218,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
               id="teacher-class-select"
               value={selectedClassId}
               onChange={(e) => handleSelectClass(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#262626] rounded-xs text-xs text-white focus:outline-none focus:border-[#555555] cursor-pointer"
+              className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#262626] rounded-xl text-xs text-white focus:outline-none focus:border-[#555555] cursor-pointer"
             >
               {classesList.map((cls) => (
                 <option key={cls.id} value={cls.id} className="bg-[#161616] text-white py-1">
@@ -234,11 +234,11 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                 value={classCodeInput}
                 onChange={(e) => setClassCodeInput(e.target.value)}
                 placeholder="Or enter Class Code (e.g. SCI-301)"
-                className="flex-1 px-3 py-1.5 bg-[#0D0D0D] border border-[#222222] text-xs font-mono uppercase text-white rounded-xs focus:outline-none focus:border-[#555555] placeholder:text-[#555555]"
+                className="flex-1 px-3.5 py-2 bg-[#0D0D0D] border border-[#222222] text-xs font-mono uppercase text-white rounded-lg focus:outline-none focus:border-[#555555] placeholder:text-[#555555]"
               />
               <button
                 type="submit"
-                className="px-3 py-1.5 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition flex items-center gap-1.5"
+                className="px-3.5 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-white text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition flex items-center gap-1.5"
               >
                 <Search className="w-3 h-3 text-white" />
                 <span>Find</span>
@@ -246,7 +246,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             </form>
           </div>
         ) : (
-          <div className="p-3 bg-[#161616] border border-[#222222] rounded-xs flex items-center justify-between">
+          <div className="p-3.5 bg-[#161616] border border-[#222222] rounded-xl flex items-center justify-between">
             <div>
               <div className="text-xs font-medium text-white">
                 {activeClassData?.className || state.className}
@@ -255,7 +255,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                 Instructor: {classesList[0]?.teacherName || 'Faculty'} &middot; Code: {activeClassData?.classCode || 'SCI-301'}
               </div>
             </div>
-            <span className="text-[10px] font-mono text-black font-bold bg-[#D4AF37] px-2 py-0.5 rounded-xs">
+            <span className="text-[10px] font-mono text-black font-bold bg-[#D4AF37] px-2.5 py-1 rounded-md">
               {currentStudents.length} Students
             </span>
           </div>
@@ -264,7 +264,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
 
       {/* Student PIN Input Card */}
       {currentStudents.length === 0 ? (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-8 text-center shadow-xl">
+        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-8 text-center shadow-xl">
           <AlertCircle className="w-8 h-8 text-[#EF4444] mx-auto mb-2" />
           <h4 className="font-serif italic text-lg text-white mb-1">
             No Students in This Class Yet
@@ -274,15 +274,15 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
           </p>
           <button
             onClick={onBack}
-            className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+            className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
           >
             Back to Home
           </button>
         </div>
       ) : (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
           {errorMessage && (
-            <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 text-xs text-[#EF4444] flex items-start gap-2 rounded-r-xs font-mono">
+            <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 text-xs text-[#EF4444] flex items-start gap-2 rounded-r-lg font-mono">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -306,7 +306,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                   setPin('');
                   setErrorMessage('');
                 }}
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xl text-sm text-white focus:outline-none focus:border-[var(--gold)] cursor-pointer"
               >
                 {currentStudents.map((student) => (
                   <option key={student.id} value={student.id} className="bg-[#161616] text-white">
@@ -331,7 +331,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="••••"
-                className="w-full px-4 py-3 bg-[#161616] border border-[#1F1F1F] rounded-xs text-center text-2xl tracking-[0.5em] font-mono font-bold text-white focus:outline-none focus:border-white"
+                className="w-full px-4 py-3 bg-[#161616] border border-[#1F1F1F] rounded-xl text-center text-2xl tracking-[0.5em] font-mono font-bold text-white focus:outline-none focus:border-white"
                 autoFocus
               />
             </div>
@@ -343,7 +343,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                   key={digit}
                   type="button"
                   onClick={() => handleKeypadPress(digit)}
-                  className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-xs text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
+                  className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-lg text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
                 >
                   {digit}
                 </button>
@@ -351,21 +351,21 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
               <button
                 type="button"
                 onClick={() => setPin('')}
-                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-xs text-xs font-mono uppercase tracking-wider text-[#888888] cursor-pointer"
+                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-lg text-xs font-mono uppercase tracking-wider text-[#888888] cursor-pointer"
               >
                 Clear
               </button>
               <button
                 type="button"
                 onClick={() => handleKeypadPress('0')}
-                className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-xs text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
+                className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-lg text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
               >
                 0
               </button>
               <button
                 type="button"
                 onClick={handleKeypadBackspace}
-                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-xs text-xs font-mono uppercase tracking-wider text-[#EF4444] cursor-pointer"
+                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-lg text-xs font-mono uppercase tracking-wider text-[#EF4444] cursor-pointer"
               >
                 ⌫
               </button>
@@ -375,7 +375,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             <button
               type="submit"
               id="student-login-enter-btn"
-              className="w-full py-3 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-mono font-bold uppercase tracking-widest rounded-xs text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] mt-3 flex items-center justify-center gap-2"
+              className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-mono font-bold uppercase tracking-widest rounded-xl text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] mt-3 flex items-center justify-center gap-2"
             >
               <KeyRound className="w-4 h-4 text-black" />
               <span>Enter Weekly Check-Ins</span>

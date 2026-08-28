@@ -658,3 +658,72 @@ export function resetClassroomDataToDefault(): ClassroomState {
 }
 
 export const resetClassroomState = resetClassroomDataToDefault;
+
+// Clear a specific quiz score for an individual student
+export function clearStudentQuizScore(classId: string, studentId: string, weekId: string): ClassroomData | null {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return null;
+
+  if (cls.results[studentId] && cls.results[studentId][weekId]) {
+    delete cls.results[studentId][weekId];
+    // If student has no more submissions, clean up key
+    if (Object.keys(cls.results[studentId]).length === 0) {
+      delete cls.results[studentId];
+    }
+    cls.updatedAt = Date.now();
+    saveAppStore(store);
+  }
+  return cls;
+}
+
+// Clear all student submissions for a specific week/quiz module
+export function clearAllScoresForWeek(classId: string, weekId: string): ClassroomData | null {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return null;
+
+  let modified = false;
+  Object.keys(cls.results).forEach((studentId) => {
+    if (cls.results[studentId] && cls.results[studentId][weekId]) {
+      delete cls.results[studentId][weekId];
+      modified = true;
+      if (Object.keys(cls.results[studentId]).length === 0) {
+        delete cls.results[studentId];
+      }
+    }
+  });
+
+  if (modified) {
+    cls.updatedAt = Date.now();
+    saveAppStore(store);
+  }
+  return cls;
+}
+
+// Clear all quiz submissions for a specific student across all weeks
+export function clearAllScoresForStudent(classId: string, studentId: string): ClassroomData | null {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return null;
+
+  if (cls.results[studentId]) {
+    delete cls.results[studentId];
+    cls.updatedAt = Date.now();
+    saveAppStore(store);
+  }
+  return cls;
+}
+
+// Clear all quiz scores across the entire classroom
+export function clearAllClassroomScores(classId: string): ClassroomData | null {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return null;
+
+  cls.results = {};
+  cls.updatedAt = Date.now();
+  saveAppStore(store);
+  return cls;
+}
+

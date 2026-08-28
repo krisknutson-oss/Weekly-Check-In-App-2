@@ -169,7 +169,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
   return (
     <div className="space-y-6 text-left">
       {/* Isolation Guarantee Banner */}
-      <div className="bg-[#161616] border border-[#262626] rounded-xs p-4 flex items-start gap-3 shadow-sm">
+      <div className="bg-[#161616] border border-[#262626] rounded-2xl p-4 flex items-start gap-3 shadow-sm">
         <div className="w-8 h-8 rounded-full bg-[var(--gold)]/10 border border-[var(--gold)]/30 flex items-center justify-center shrink-0 mt-0.5">
           <Shield className="w-4 h-4 text-[var(--gold)]" />
         </div>
@@ -185,13 +185,13 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
 
       {/* Feedback Alerts */}
       {errorMessage && (
-        <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3 text-xs text-[#EF4444] flex items-start gap-2 rounded-r-xs font-mono">
+        <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3 text-xs text-[#EF4444] flex items-start gap-2 rounded-r-lg font-mono">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{errorMessage}</span>
         </div>
       )}
       {successMessage && (
-        <div className="bg-[#22C55E]/10 border-l-2 border-[#22C55E] p-3 text-xs text-[#22C55E] flex items-start gap-2 rounded-r-xs font-mono">
+        <div className="bg-[#22C55E]/10 border-l-2 border-[#22C55E] p-3 text-xs text-[#22C55E] flex items-start gap-2 rounded-r-lg font-mono">
           <Check className="w-4 h-4 shrink-0 mt-0.5" />
           <span>{successMessage}</span>
         </div>
@@ -200,13 +200,13 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
       {/* Grid of Account Settings & Classes */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Section 1: My Profile & Security */}
-        <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-xs p-5 space-y-4">
+        <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-3">
             <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--gold)] font-semibold flex items-center gap-2">
               <UserCheck className="w-4 h-4" />
               <span>Educator Profile &amp; Security</span>
             </h3>
-            <span className="text-[10px] font-mono text-[#888888] bg-[#161616] px-2 py-0.5 rounded-xs">
+            <span className="text-[10px] font-mono text-[#888888] bg-[#161616] px-2 py-0.5 rounded-md">
               ID: {currentTeacher.id.slice(0, 8)}
             </span>
           </div>
@@ -220,7 +220,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                 type="text"
                 value={profileName}
                 onChange={(e) => setProfileName(e.target.value)}
-                className="w-full px-3 py-2 bg-[#161616] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                className="w-full px-3 py-2 bg-[#161616] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 required
               />
             </div>
@@ -233,7 +233,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                 type="email"
                 value={currentTeacher.email}
                 disabled
-                className="w-full px-3 py-2 bg-[#121212] border border-[#1F1F1F] rounded-xs text-sm text-[#777777] cursor-not-allowed font-mono"
+                className="w-full px-3 py-2 bg-[#121212] border border-[#1F1F1F] rounded-lg text-sm text-[#777777] cursor-not-allowed font-mono"
               />
             </div>
 
@@ -246,7 +246,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                 value={profileSubject}
                 onChange={(e) => setProfileSubject(e.target.value)}
                 placeholder="e.g. Social Studies, Integrated Sciences"
-                className="w-full px-3 py-2 bg-[#161616] border border-[#262626] rounded-xs text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                className="w-full px-3 py-2 bg-[#161616] border border-[#262626] rounded-lg text-sm text-white focus:outline-none focus:border-[var(--gold)] font-sans"
               />
             </div>
 
@@ -262,7 +262,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
             </div>
 
             {showPasswordChange && (
-              <div className="p-3 bg-[#141414] border border-[#262626] rounded-xs space-y-2.5">
+              <div className="p-3.5 bg-[#141414] border border-[#262626] rounded-xl space-y-2.5">
                 <div>
                   <label className="block text-[10px] uppercase tracking-wider font-mono text-[#888888] mb-1">
                     New Password (min 6 chars)
@@ -272,7 +272,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#333333] rounded-xs text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#333333] rounded-lg text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
                   />
                 </div>
                 <div>
@@ -284,7 +284,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                     value={confirmNewPassword}
                     onChange={(e) => setConfirmNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#333333] rounded-xs text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
+                    className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#333333] rounded-lg text-sm font-mono text-white focus:outline-none focus:border-[var(--gold)]"
                   />
                 </div>
               </div>
@@ -292,7 +292,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
 
             <button
               type="submit"
-              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] hover:border-[var(--gold)] text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition font-medium"
+              className="w-full py-2.5 px-4 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] hover:border-[var(--gold)] text-white text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition font-medium"
             >
               Save Profile Changes
             </button>
@@ -316,7 +316,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                   playClickSound();
                   setTeacherToDelete(currentTeacher);
                 }}
-                className="px-2.5 py-1.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/40 text-[#EF4444] text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition shrink-0 flex items-center gap-1"
+                className="px-2.5 py-1.5 bg-[#EF4444]/10 hover:bg-[#EF4444]/20 border border-[#EF4444]/40 text-[#EF4444] text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition shrink-0 flex items-center gap-1"
               >
                 <Trash2 className="w-3 h-3" />
                 <span>Delete Account</span>
@@ -326,7 +326,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
         </div>
 
         {/* Section 2: My Isolated Classes */}
-        <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-xs p-5 space-y-4">
+        <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-3">
             <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--gold)] font-semibold flex items-center gap-2">
               <School className="w-4 h-4" />
@@ -335,7 +335,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
             <button
               type="button"
               onClick={() => setShowNewClassForm(!showNewClassForm)}
-              className="text-[11px] font-mono uppercase tracking-wider bg-[var(--gold)]/10 text-[var(--gold)] hover:bg-[var(--gold)]/20 border border-[var(--gold)]/30 px-2 py-1 rounded-xs flex items-center gap-1 cursor-pointer transition"
+              className="text-[11px] font-mono uppercase tracking-wider bg-[var(--gold)]/10 text-[var(--gold)] hover:bg-[var(--gold)]/20 border border-[var(--gold)]/30 px-2.5 py-1 rounded-lg flex items-center gap-1 cursor-pointer transition"
             >
               <Plus className="w-3 h-3" />
               <span>Add Class</span>
@@ -344,7 +344,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
 
           {/* Quick Add Class Form */}
           {showNewClassForm && (
-            <form onSubmit={handleAddClass} className="p-3 bg-[#141414] border border-[#262626] rounded-xs space-y-2.5">
+            <form onSubmit={handleAddClass} className="p-3.5 bg-[#141414] border border-[#262626] rounded-xl space-y-2.5">
               <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--gold)] font-semibold">
                 + Create Another Isolated Class
               </div>
@@ -353,7 +353,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                 value={newClassName}
                 onChange={(e) => setNewClassName(e.target.value)}
                 placeholder="Class Name (e.g. Period 2: World History)"
-                className="w-full px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                className="w-full px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 required
               />
               <div className="grid grid-cols-2 gap-2">
@@ -362,27 +362,27 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                   value={newClassSubject}
                   onChange={(e) => setNewClassSubject(e.target.value)}
                   placeholder="Subject"
-                  className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
                 <input
                   type="text"
                   value={newClassPeriod}
                   onChange={(e) => setNewClassPeriod(e.target.value)}
                   placeholder="Period / Section"
-                  className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
+                  className="px-3 py-1.5 bg-[#1A1A1A] border border-[#333333] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-sans"
                 />
               </div>
               <div className="flex justify-end gap-2 pt-1">
                 <button
                   type="button"
                   onClick={() => setShowNewClassForm(false)}
-                  className="px-3 py-1 bg-[#1A1A1A] text-[#888888] text-xs font-mono uppercase rounded-xs"
+                  className="px-3 py-1 bg-[#1A1A1A] text-[#888888] text-xs font-mono uppercase rounded-lg cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-3 py-1 bg-[var(--gold)] text-[#0A0A0A] text-xs font-mono uppercase font-semibold rounded-xs"
+                  className="px-3 py-1 bg-[var(--gold)] text-[#0A0A0A] text-xs font-mono uppercase font-semibold rounded-lg cursor-pointer"
                 >
                   Create
                 </button>
@@ -397,7 +397,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
               return (
                 <div
                   key={cls.id}
-                  className={`p-3 rounded-xs border transition flex items-center justify-between gap-3 ${
+                  className={`p-3 rounded-xl border transition flex items-center justify-between gap-3 ${
                     isActive
                       ? 'bg-[#181818] border-[var(--gold)] text-white shadow-xs'
                       : 'bg-[#121212] border-[#1F1F1F] text-[#888888]'
@@ -407,7 +407,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                     <div className="text-xs font-medium text-white flex items-center gap-2">
                       <span>{cls.className}</span>
                       {isActive && (
-                        <span className="text-[9px] bg-[var(--gold)]/20 text-[var(--gold)] px-1.5 py-0.2 rounded-xs font-mono">
+                        <span className="text-[9px] bg-[var(--gold)]/20 text-[var(--gold)] px-1.5 py-0.5 rounded-md font-mono">
                           Currently Active
                         </span>
                       )}
@@ -430,7 +430,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                         const currentStore = loadAppStore();
                         onUpdateState(buildClassroomStateFromClass(targetClass, currentTeacher, currentStore.teachers));
                       }}
-                      className="px-2.5 py-1 bg-[#1A1A1A] hover:bg-[#262626] border border-[#333333] hover:border-[var(--gold)] text-xs font-mono text-[var(--gold)] rounded-xs cursor-pointer transition"
+                      className="px-2.5 py-1 bg-[#1A1A1A] hover:bg-[#262626] border border-[#333333] hover:border-[var(--gold)] text-xs font-mono text-[var(--gold)] rounded-lg cursor-pointer transition"
                     >
                       Switch
                     </button>
@@ -443,7 +443,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
       </div>
 
       {/* Section 3: Registered Educators Directory */}
-      <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-xs p-5 space-y-3">
+      <div className="bg-[#0E0E0E] border border-[#1F1F1F] rounded-2xl p-5 space-y-3">
         <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-2.5">
           <h3 className="font-mono text-xs uppercase tracking-widest text-[var(--gold)] font-semibold flex items-center gap-2">
             <ArrowRightLeft className="w-4 h-4" />
@@ -461,7 +461,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
             return (
               <div
                 key={t.id}
-                className={`p-3 rounded-xs border text-xs flex items-center justify-between gap-2 ${
+                className={`p-3 rounded-xl border text-xs flex items-center justify-between gap-2 ${
                   isCurrent
                     ? 'bg-[#161616] border-[var(--gold)]/50 text-white'
                     : 'bg-[#121212] border-[#1F1F1F] text-[#888888]'
@@ -471,7 +471,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                   <div className="font-medium text-white flex items-center gap-1.5">
                     <span>{t.name}</span>
                     {isCurrent && (
-                      <span className="text-[9px] bg-[var(--gold)]/15 text-[var(--gold)] px-1 rounded-xs font-mono">
+                      <span className="text-[9px] bg-[var(--gold)]/15 text-[var(--gold)] px-1.5 py-0.5 rounded-md font-mono">
                         You
                       </span>
                     )}
@@ -490,7 +490,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                         playClickSound();
                         onSwitchTeacher(t);
                       }}
-                      className="p-1.5 text-[#888888] hover:text-[var(--gold)] hover:bg-[#222222] rounded-xs transition cursor-pointer"
+                      className="p-1.5 text-[#888888] hover:text-[var(--gold)] hover:bg-[#222222] rounded-lg transition cursor-pointer"
                       title="Switch to this educator account"
                     >
                       <ArrowRightLeft className="w-3.5 h-3.5" />
@@ -502,7 +502,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
                       playClickSound();
                       setTeacherToDelete(t);
                     }}
-                    className="p-1.5 text-[#666666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-xs transition cursor-pointer"
+                    className="p-1.5 text-[#666666] hover:text-[#EF4444] hover:bg-[#EF4444]/10 rounded-lg transition cursor-pointer"
                     title={isCurrent ? 'Delete your educator account' : `Delete account for ${t.name}`}
                   >
                     <Trash2 className="w-3.5 h-3.5" />
@@ -517,7 +517,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
       {/* Delete Educator Account Confirmation Modal */}
       {teacherToDelete && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-[#121212] border border-[#EF4444]/40 rounded-xs max-w-md w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150 text-left">
+          <div className="bg-[#121212] border border-[#EF4444]/40 rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-150 text-left">
             <div className="flex items-center gap-2.5 text-[#EF4444] border-b border-[#262626] pb-3">
               <Trash2 className="w-5 h-5 shrink-0" />
               <h3 className="font-mono text-sm uppercase tracking-wider font-semibold">
@@ -531,7 +531,7 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
               <span className="font-mono text-[var(--gold)]">{teacherToDelete.email}</span>)?
             </p>
 
-            <div className="bg-[#1A1111] border border-[#EF4444]/20 p-3 rounded-xs text-[11px] font-mono text-[#EF4444] space-y-1">
+            <div className="bg-[#1A1111] border border-[#EF4444]/20 p-3.5 rounded-xl text-[11px] font-mono text-[#EF4444] space-y-1">
               <div className="font-semibold uppercase tracking-wider">Warning &mdash; Immediate deletion will:</div>
               <ul className="list-disc list-inside space-y-0.5 text-[#FFAAAA]">
                 <li>Erase all {getClassesForTeacher(teacherToDelete.id).length} classes created under this account</li>
@@ -550,14 +550,14 @@ export const FacultyTab: React.FC<FacultyTabProps> = ({
               <button
                 type="button"
                 onClick={() => setTeacherToDelete(null)}
-                className="px-4 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-[#CCCCCC] text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+                className="px-4 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-[#CCCCCC] text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
-                className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-mono uppercase tracking-wider font-semibold rounded-xs cursor-pointer transition shadow-[0_0_15px_rgba(239,68,68,0.3)] flex items-center gap-1.5"
+                className="px-4 py-2 bg-[#EF4444] hover:bg-[#DC2626] text-white text-xs font-mono uppercase tracking-wider font-semibold rounded-lg cursor-pointer transition shadow-[0_0_15px_rgba(239,68,68,0.3)] flex items-center gap-1.5"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 <span>Permanently Delete</span>

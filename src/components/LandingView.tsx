@@ -53,11 +53,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Teacher Card */}
         <div
           id="teacher-portal-card"
-          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-sm p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
+          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] border border-[#D4AF37] px-2.5 py-1 rounded-xs">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] border border-[#D4AF37] px-2.5 py-1 rounded-md">
                 Staff &middot; Co-Teachers
               </span>
               <Shield className="w-5 h-5 text-[#888888] group-hover:text-white transition-colors" />
@@ -74,7 +74,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <button
               id="go-teacher-btn"
               onClick={handleTeacherClick}
-              className="w-full py-3.5 px-4 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white font-medium rounded-sm text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer group-hover:bg-[#161616]"
+              className="w-full py-3.5 px-4 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white font-medium rounded-xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer group-hover:bg-[#161616]"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Teacher Login / Dashboard</span>
@@ -86,11 +86,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Student Card */}
         <div
           id="student-portal-card"
-          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-sm p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
+          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#22C55E] border border-[#22C55E] px-2.5 py-1 rounded-xs">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#22C55E] border border-[#22C55E] px-2.5 py-1 rounded-md">
                 Roster &middot; Students
               </span>
               <Award className="w-5 h-5 text-[#888888] group-hover:text-[#22C55E] transition-colors" />
@@ -106,7 +106,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
           <button
             id="go-student-btn"
             onClick={handleStudentClick}
-            className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-bold rounded-sm text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)]"
+            className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-bold rounded-xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)]"
           >
             <span>Open Student Portal</span>
             <ArrowRight className="w-3.5 h-3.5 text-black" />
@@ -115,7 +115,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </div>
 
       {/* Classroom Status Snapshot */}
-      <div className="w-full max-w-3xl bg-[#121212] border border-[#1F1F1F] rounded-sm p-6 sm:p-8 text-left shadow-lg">
+      <div className="w-full max-w-3xl bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 text-left shadow-lg">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1F1F1F] pb-5 mb-5">
           <div>
             <div className="text-[10px] uppercase tracking-widest text-[#666666] mb-1">Active Course</div>
@@ -127,13 +127,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-sm">
+            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-lg">
               <div className="text-[9px] uppercase tracking-widest text-[#666666]">Roster</div>
               <div className="font-mono text-xs font-semibold text-white">{totalStudents} Enrolled</div>
             </div>
-            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-sm">
+            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-lg">
               <div className="text-[9px] uppercase tracking-widest text-[#666666]">Modules</div>
-              <div className="font-mono text-xs font-bold text-black bg-[#D4AF37] px-2 py-0.5 rounded-xs">{publishedCount} Published</div>
+              <div className="font-mono text-xs font-bold text-black bg-[#D4AF37] px-2 py-0.5 rounded-md">{publishedCount} Published</div>
             </div>
           </div>
         </div>
@@ -157,10 +157,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
                   else if (onSelectRole) onSelectRole('student');
                   else if (onNavigate) onNavigate('student-login');
                 }}
-                className="bg-[#161616] hover:bg-[#1F1F1F] border border-[#1F1F1F] hover:border-[#333333] rounded-sm px-3 py-1.5 text-xs text-[#E0E0E0] flex items-center gap-2 transition cursor-pointer group"
+                className="bg-[#161616] hover:bg-[#1F1F1F] border border-[#1F1F1F] hover:border-[#333333] rounded-lg px-3 py-1.5 text-xs text-[#E0E0E0] flex items-center gap-2 transition cursor-pointer group"
               >
                 <span className="font-medium group-hover:text-white">{student.name}</span>
-                <span className="font-mono text-[10px] bg-[#D4AF37] text-black font-bold px-1.5 py-0.5 rounded-xs">
+                <span className="font-mono text-[10px] bg-[#D4AF37] text-black font-bold px-1.5 py-0.5 rounded-md">
                   {student.pin}
                 </span>
               </button>

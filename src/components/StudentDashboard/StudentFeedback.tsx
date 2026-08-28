@@ -57,23 +57,23 @@ export const StudentFeedback: React.FC<StudentFeedbackProps> = ({
 
         <button
           onClick={onBackToHome}
-          className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer transition self-start sm:self-auto"
+          className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer transition self-start sm:self-auto"
         >
           Return to All Weeks
         </button>
       </div>
 
       {/* Score Summary Box */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             {isGreatScore ? (
-              <span className="bg-[#22C55E] text-black font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-xs flex items-center gap-1.5 shadow-sm">
+              <span className="bg-[#22C55E] text-black font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-black" />
                 <span>STRONG UNIT MASTERY</span>
               </span>
             ) : (
-              <span className="bg-[#D4AF37] text-black font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-xs flex items-center gap-1.5 shadow-sm">
+              <span className="bg-[#D4AF37] text-black font-mono text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md flex items-center gap-1.5 shadow-sm">
                 <AlertTriangle className="w-3.5 h-3.5 text-black" />
                 <span>REVIEW RECOMMENDED</span>
               </span>
@@ -111,22 +111,22 @@ export const StudentFeedback: React.FC<StudentFeedbackProps> = ({
           return (
             <div
               key={qi}
-              className={`p-5 rounded-xs border transition ${
+              className={`p-5 rounded-xl border transition ${
                 isCorrect ? 'bg-[#121212] border-[#1F1F1F]' : 'bg-[#121212] border-[#EF4444]/30'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="font-mono font-bold text-xs bg-[#D4AF37] text-black px-2 py-0.5 rounded-xs">
+                <span className="font-mono font-bold text-xs bg-[#D4AF37] text-black px-2.5 py-0.5 rounded-md">
                   Q{qi + 1}
                 </span>
 
                 {isCorrect ? (
-                  <span className="text-xs font-mono font-medium text-[#22C55E] flex items-center gap-1.5 bg-[#22C55E]/10 border border-[#22C55E]/30 px-2.5 py-0.5 rounded-xs">
+                  <span className="text-xs font-mono font-medium text-[#22C55E] flex items-center gap-1.5 bg-[#22C55E]/10 border border-[#22C55E]/30 px-2.5 py-1 rounded-md">
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Correct</span>
                   </span>
                 ) : (
-                  <span className="text-xs font-mono font-medium text-[#EF4444] flex items-center gap-1.5 bg-[#EF4444]/10 border border-[#EF4444]/30 px-2.5 py-0.5 rounded-xs">
+                  <span className="text-xs font-mono font-medium text-[#EF4444] flex items-center gap-1.5 bg-[#EF4444]/10 border border-[#EF4444]/30 px-2.5 py-1 rounded-md">
                     <XCircle className="w-3.5 h-3.5" />
                     <span>Incorrect</span>
                   </span>
@@ -153,7 +153,7 @@ export const StudentFeedback: React.FC<StudentFeedbackProps> = ({
                   return (
                     <div
                       key={oi}
-                      className={`p-2.5 rounded-xs border flex items-center justify-between gap-2.5 ${rowStyle}`}
+                      className={`p-2.5 rounded-lg border flex items-center justify-between gap-2.5 ${rowStyle}`}
                     >
                       <div className="flex items-center gap-2">
                         <span className="font-mono font-bold">
@@ -163,13 +163,13 @@ export const StudentFeedback: React.FC<StudentFeedbackProps> = ({
                       </div>
 
                       {isTheCorrectChoice && (
-                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#22C55E] text-[#0A0A0A] px-1.5 py-0.5 rounded-xs">
+                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#22C55E] text-[#0A0A0A] px-2 py-0.5 rounded-md">
                           Correct Answer
                         </span>
                       )}
 
                       {isUserSelection && !isCorrect && (
-                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#EF4444] text-white px-1.5 py-0.5 rounded-xs">
+                        <span className="text-[9px] font-mono font-bold uppercase tracking-wider bg-[#EF4444] text-white px-2 py-0.5 rounded-md">
                           Your Answer
                         </span>
                       )}
@@ -180,8 +180,8 @@ export const StudentFeedback: React.FC<StudentFeedbackProps> = ({
 
               {/* Rationale Explanation */}
               {q.explanation && (
-                <div className="mt-3 bg-[#161616] p-3 rounded-xs border border-[#1F1F1F] text-xs text-[#CCCCCC] font-mono font-light">
-                  <span className="text-black font-bold bg-[#D4AF37] uppercase text-[10px] tracking-wider inline-block px-1.5 py-0.2 rounded-xs mb-1">Explanation:</span>
+                <div className="mt-3 bg-[#161616] p-3.5 rounded-lg border border-[#1F1F1F] text-xs text-[#CCCCCC] font-mono font-light">
+                  <span className="text-black font-bold bg-[#D4AF37] uppercase text-[10px] tracking-wider inline-block px-2 py-0.5 rounded-md mb-1.5">Explanation:</span>
                   <div>{q.explanation}</div>
                 </div>
               )}

@@ -1,6 +1,13 @@
 import React, { useState, useRef } from 'react';
 import { ClassroomState, QuizSubmission, Student, Teacher, ClassroomData } from '../../types';
-import { pin4, uid, saveClassroomState, loadAppStore, copyStudentsBetweenClasses } from '../../utils/storage';
+import { 
+  pin4, 
+  uid, 
+  saveClassroomState, 
+  loadAppStore, 
+  copyStudentsBetweenClasses,
+  clearAllScoresForStudent
+} from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
 import {
   UserPlus,
@@ -28,6 +35,7 @@ import {
   CheckSquare,
   Square,
   ArrowRight,
+  RotateCcw,
 } from 'lucide-react';
 
 interface StudentsTabProps {
@@ -47,6 +55,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [armedDeleteId, setArmedDeleteId] = useState<string | null>(null);
+  const [armedClearScoresStudentId, setArmedClearScoresStudentId] = useState<string | null>(null);
   const [armedDeleteTeacherId, setArmedDeleteTeacherId] = useState<string | null>(null);
 
   // Copy from Class Modal State
@@ -223,6 +232,35 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       setArmedDeleteId(studentId);
       setTimeout(() => {
         setArmedDeleteId((prev) => (prev === studentId ? null : prev));
+      }, 3500);
+    }
+  };
+
+  // Clear all quiz scores for a specific student
+  const handleClearStudentScores = (studentId: string, studentName: string) => {
+    if (armedClearScoresStudentId === studentId) {
+      playStampSound();
+      const updatedResults = { ...state.results };
+      delete updatedResults[studentId];
+
+      const updatedState: ClassroomState = {
+        ...state,
+        results: updatedResults,
+      };
+
+      saveClassroomState(updatedState);
+      onUpdateState(updatedState);
+      if (state.id) {
+        clearAllScoresForStudent(state.id, studentId);
+      }
+      setArmedClearScoresStudentId(null);
+      setPrintNotification(`Cleared all quiz scores for ${studentName}.`);
+      setTimeout(() => setPrintNotification(null), 3500);
+    } else {
+      playClickSound();
+      setArmedClearScoresStudentId(studentId);
+      setTimeout(() => {
+        setArmedClearScoresStudentId((prev) => (prev === studentId ? null : prev));
       }, 3500);
     }
   };
@@ -622,7 +660,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               playClickSound();
               setShowShareModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-xs text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-lg text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
             title="Share direct student check-in link with your class"
           >
             <Share2 className="w-3.5 h-3.5 text-[var(--gold)]" />
@@ -632,7 +670,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
           <button
             id="open-copy-class-modal-btn"
             onClick={handleOpenCopyModal}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-xs text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[var(--gold)]/50 rounded-lg text-[11px] font-mono uppercase tracking-wider text-white transition cursor-pointer"
             title="Copy students from another class into this classroom roster"
           >
             <FolderInput className="w-3.5 h-3.5 text-[var(--gold)]" />
@@ -645,7 +683,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               playClickSound();
               setShowBulkModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] rounded-xs text-[11px] font-mono uppercase tracking-wider text-[#E0E0E0] hover:text-white transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] rounded-lg text-[11px] font-mono uppercase tracking-wider text-[#E0E0E0] hover:text-white transition cursor-pointer"
           >
             <Users className="w-3.5 h-3.5 text-white" />
             <span>Bulk Add</span>
@@ -657,7 +695,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               playClickSound();
               setShowPrintModal(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-bold rounded-xs text-[11px] font-mono uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.2)]"
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-bold rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.2)]"
           >
             <Printer className="w-3.5 h-3.5 text-black" />
             <span>Print PIN Sheet</span>
@@ -667,7 +705,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
       {/* Success / Feedback Toast */}
       {copyFeedbackToast && (
-        <div className="bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 px-4 py-3 rounded-xs text-xs font-mono flex items-center justify-between shadow-lg animate-in fade-in">
+        <div className="bg-emerald-950/70 border border-emerald-500/50 text-emerald-300 px-4 py-3 rounded-xl text-xs font-mono flex items-center justify-between shadow-lg animate-in fade-in">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
             <span>{copyFeedbackToast}</span>
@@ -683,7 +721,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       )}
 
       {/* Quick Add Form */}
-      <form onSubmit={handleAddStudent} className="bg-[#161616] border border-[#1F1F1F] rounded-xs p-4 flex flex-col sm:flex-row gap-3 items-center">
+      <form onSubmit={handleAddStudent} className="bg-[#161616] border border-[#1F1F1F] rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center">
         <div className="flex-1 w-full">
           <label htmlFor="new-student-name" className="block text-[10px] uppercase tracking-[0.2em] font-mono text-[#888888] mb-1.5">
             Add New Student to Roster
@@ -694,13 +732,13 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Student Full Name (e.g. Kai Nakamura)"
-            className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xs text-sm text-white focus:outline-none focus:border-[#555555] transition"
+            className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#555555] transition"
           />
         </div>
         <button
           type="submit"
           id="add-student-submit-btn"
-          className="w-full sm:w-auto px-4 py-2 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white text-xs uppercase tracking-widest font-mono rounded-xs transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 self-end"
+          className="w-full sm:w-auto px-4 py-2 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white text-xs uppercase tracking-widest font-mono rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 self-end"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span>Add Student</span>
@@ -709,7 +747,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
       {/* Roster Table */}
       {state.students.length === 0 ? (
-        <div className="border border-dashed border-[#1F1F1F] rounded-xs p-10 text-center bg-[#161616] space-y-4">
+        <div className="border border-dashed border-[#1F1F1F] rounded-2xl p-10 text-center bg-[#161616] space-y-4">
           <Users className="w-10 h-10 text-[#666666] mx-auto mb-2" />
           <div>
             <h4 className="font-serif italic text-lg text-white mb-1">
@@ -724,7 +762,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             <button
               type="button"
               onClick={handleOpenCopyModal}
-              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[var(--gold)]/40 text-[var(--gold)] rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition shadow-xs"
+              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[var(--gold)]/40 text-[var(--gold)] rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition shadow-xs"
             >
               <FolderInput className="w-3.5 h-3.5" />
               <span>Copy from Another Class</span>
@@ -736,7 +774,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 playClickSound();
                 setShowBulkModal(true);
               }}
-              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-white rounded-xs text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
+              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-white rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
             >
               <Users className="w-3.5 h-3.5 text-[#AAAAAA]" />
               <span>Bulk Add Names</span>
@@ -744,7 +782,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
           </div>
         </div>
       ) : (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs overflow-hidden shadow-lg">
+        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl overflow-hidden shadow-lg">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
@@ -768,13 +806,13 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                       </td>
                       <td className="py-3.5 px-4 font-mono">
                         <div className="inline-flex items-center gap-1.5">
-                          <span className="bg-[#D4AF37] text-black px-2.5 py-0.5 rounded-xs font-mono text-xs font-bold tracking-widest">
+                          <span className="bg-[#D4AF37] text-black px-2.5 py-0.5 rounded-md font-mono text-xs font-bold tracking-widest">
                             {student.pin}
                           </span>
                           <button
                             id={`copy-pin-${student.id}`}
                             onClick={() => copyStudentPin(student)}
-                            className="text-[#666666] hover:text-white p-1 rounded cursor-pointer transition-colors"
+                            className="text-[#666666] hover:text-white p-1 rounded-md cursor-pointer transition-colors"
                             title="Copy student PIN"
                           >
                             {copiedId === student.id ? (
@@ -793,7 +831,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                           <span className="text-xs text-[#555555] font-mono">—</span>
                         ) : (
                           <span
-                            className={`inline-block px-2 py-0.5 rounded-xs font-mono text-xs font-bold ${
+                            className={`inline-block px-2 py-0.5 rounded-md font-mono text-xs font-bold ${
                               avg >= 80
                                 ? 'bg-[#22C55E] text-black'
                                 : avg >= 60
@@ -806,17 +844,34 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                         )}
                       </td>
                       <td className="py-3.5 px-4 text-right">
-                        <button
-                          id={`del-student-${student.id}`}
-                          onClick={() => handleDeleteStudent(student.id)}
-                          className={`px-2.5 py-1 rounded-xs text-[11px] font-mono uppercase tracking-wider transition cursor-pointer border ${
-                            armedDeleteId === student.id
-                              ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse'
-                              : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444] hover:border-[#EF4444]/50'
-                          }`}
-                        >
-                          {armedDeleteId === student.id ? 'Confirm Remove' : 'Remove'}
-                        </button>
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          {completed > 0 && (
+                            <button
+                              id={`clear-scores-student-${student.id}`}
+                              onClick={() => handleClearStudentScores(student.id, student.name)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer border flex items-center gap-1 ${
+                                armedClearScoresStudentId === student.id
+                                  ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse font-bold'
+                                  : 'bg-transparent text-[#888888] border-[#1F1F1F] hover:text-[#EF4444] hover:border-[#EF4444]/50'
+                              }`}
+                              title="Clear all quiz scores for this student to allow retaking"
+                            >
+                              <RotateCcw className="w-3 h-3 text-[#EF4444]" />
+                              <span>{armedClearScoresStudentId === student.id ? 'Confirm Reset' : 'Reset Scores'}</span>
+                            </button>
+                          )}
+                          <button
+                            id={`del-student-${student.id}`}
+                            onClick={() => handleDeleteStudent(student.id)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer border ${
+                              armedDeleteId === student.id
+                                ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse'
+                                : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444] hover:border-[#EF4444]/50'
+                            }`}
+                          >
+                            {armedDeleteId === student.id ? 'Confirm Remove' : 'Remove'}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
@@ -832,7 +887,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         <h3 className="font-serif italic text-lg text-white mb-3">
           Registered Co-Teachers &amp; Staff<span className="text-[#D4AF37]">.</span>
         </h3>
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs overflow-hidden">
+        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl overflow-hidden">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="bg-[#161616] border-b border-[#1F1F1F] font-mono text-[10px] uppercase tracking-[0.2em] text-[#888888]">
@@ -854,7 +909,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     {state.teachers.length > 1 && tch.id !== currentTeacher.id && (
                       <button
                         onClick={() => handleDeleteTeacher(tch.id)}
-                        className={`px-2 py-0.5 rounded-xs text-[10px] font-mono uppercase tracking-wider border transition cursor-pointer ${
+                        className={`px-2 py-0.5 rounded-lg text-[10px] font-mono uppercase tracking-wider border transition cursor-pointer ${
                           armedDeleteTeacherId === tch.id
                             ? 'bg-[#EF4444] text-white border-[#EF4444]'
                             : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444]'
@@ -874,7 +929,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       {/* Bulk Add Modal */}
       {showBulkModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-          <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs max-w-lg w-full p-6 sm:p-8 shadow-2xl">
+          <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl max-w-lg w-full p-6 sm:p-8 shadow-2xl">
             <h3 className="font-serif italic text-2xl text-white mb-2">
               Bulk Add Students<span className="text-[#D4AF37]">.</span>
             </h3>
@@ -888,14 +943,14 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               onChange={(e) => setBulkInput(e.target.value)}
               rows={7}
               placeholder="Amara Khan&#10;Benjamin Hayes&#10;Chloe Tremblay&#10;Dominic Silva"
-              className="w-full p-3 bg-[#161616] border border-[#1F1F1F] rounded-xs text-sm text-white font-mono mb-4 focus:outline-none focus:border-[#D4AF37]"
+              className="w-full p-3 bg-[#161616] border border-[#1F1F1F] rounded-xl text-sm text-white font-mono mb-4 focus:outline-none focus:border-[#D4AF37]"
             />
 
             <div className="flex justify-end gap-2.5">
               <button
                 type="button"
                 onClick={() => setShowBulkModal(false)}
-                className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider cursor-pointer"
+                className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
               >
                 Cancel
               </button>
@@ -903,7 +958,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 type="button"
                 id="bulk-add-confirm-btn"
                 onClick={handleBulkAdd}
-                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-xs text-xs font-mono uppercase tracking-widest cursor-pointer"
+                className="px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-lg text-xs font-mono uppercase tracking-widest cursor-pointer"
               >
                 Enroll Students
               </button>
@@ -917,7 +972,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
           ========================================================================= */}
       {showPrintModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 z-50 overflow-y-auto">
-          <div className="bg-[#121212] border border-[#222222] rounded-xs max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl animate-in fade-in zoom-in duration-150">
+          <div className="bg-[#121212] border border-[#222222] rounded-2xl max-w-4xl w-full max-h-[92vh] flex flex-col shadow-2xl animate-in fade-in zoom-in duration-150 overflow-hidden">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-[#1F1F1F] bg-[#161616] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
               <div>
@@ -938,7 +993,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   type="button"
                   id="print-sheet-primary-btn"
                   onClick={handlePrintSheet}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-xs text-xs font-mono font-semibold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.3)]"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] rounded-lg text-xs font-mono font-semibold uppercase tracking-wider transition cursor-pointer shadow-[0_0_12px_rgba(212,175,55,0.3)]"
                 >
                   <Printer className="w-3.5 h-3.5 text-[#0A0A0A]" />
                   <span>Print Sheet</span>
@@ -948,7 +1003,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   type="button"
                   onClick={handleOpenInNewTab}
                   title="Open high-res printable document in a standalone new browser window"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#E0E0E0] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#E0E0E0] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer"
                 >
                   <ExternalLink className="w-3.5 h-3.5 text-[#D4AF37]" />
                   <span className="hidden sm:inline">New Tab</span>
@@ -958,7 +1013,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   type="button"
                   onClick={handleDownloadHTML}
                   title="Download standalone printable HTML file"
-                  className="p-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#CCCCCC] hover:text-white rounded-xs transition cursor-pointer"
+                  className="p-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#CCCCCC] hover:text-white rounded-lg transition cursor-pointer"
                 >
                   <Download className="w-4 h-4" />
                 </button>
@@ -967,7 +1022,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   type="button"
                   onClick={handleCopyRoster}
                   title="Copy roster table (Name & PIN) to clipboard"
-                  className="p-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#CCCCCC] hover:text-[#D4AF37] rounded-xs transition cursor-pointer"
+                  className="p-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-[#CCCCCC] hover:text-[#D4AF37] rounded-lg transition cursor-pointer"
                 >
                   {copiedRosterFeedback ? <Check className="w-4 h-4 text-[#22C55E]" /> : <FileSpreadsheet className="w-4 h-4" />}
                 </button>
@@ -975,7 +1030,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowPrintModal(false)}
-                  className="px-3 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-[#888888] hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider transition cursor-pointer"
+                  className="px-3 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#333333] text-[#888888] hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer"
                 >
                   Close
                 </button>
@@ -994,11 +1049,11 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             <div className="p-3 sm:px-5 sm:py-3 bg-[#0E0E0E] border-b border-[#1F1F1F] flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
               <div className="flex items-center gap-2">
                 <span className="text-[#666666] uppercase text-[10px] tracking-wider">Layout:</span>
-                <div className="flex bg-[#161616] border border-[#262626] rounded-xs p-0.5">
+                <div className="flex bg-[#161616] border border-[#262626] rounded-lg p-0.5">
                   <button
                     type="button"
                     onClick={() => setPrintLayout('slips')}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-xs transition cursor-pointer ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition cursor-pointer ${
                       printLayout === 'slips'
                         ? 'bg-[#222222] text-[#D4AF37] font-semibold'
                         : 'text-[#888888] hover:text-white'
@@ -1010,7 +1065,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   <button
                     type="button"
                     onClick={() => setPrintLayout('table')}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-xs transition cursor-pointer ${
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-md transition cursor-pointer ${
                       printLayout === 'table'
                         ? 'bg-[#222222] text-[#D4AF37] font-semibold'
                         : 'text-[#888888] hover:text-white'
@@ -1027,7 +1082,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     <button
                       type="button"
                       onClick={() => setCardsPerRow(2)}
-                      className={`px-2 py-0.5 rounded-xs border text-[11px] cursor-pointer ${
+                      className={`px-2 py-0.5 rounded-md border text-[11px] cursor-pointer ${
                         cardsPerRow === 2 ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/10' : 'border-[#262626] text-[#777777]'
                       }`}
                     >
@@ -1036,7 +1091,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     <button
                       type="button"
                       onClick={() => setCardsPerRow(3)}
-                      className={`px-2 py-0.5 rounded-xs border text-[11px] cursor-pointer ${
+                      className={`px-2 py-0.5 rounded-md border text-[11px] cursor-pointer ${
                         cardsPerRow === 3 ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/10' : 'border-[#262626] text-[#777777]'
                       }`}
                     >
@@ -1053,7 +1108,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   value={customNote}
                   onChange={(e) => setCustomNote(e.target.value)}
                   placeholder="Custom student instruction note..."
-                  className="w-full px-2.5 py-1 bg-[#161616] border border-[#222222] rounded-xs text-[11px] text-[#CCCCCC] focus:outline-none focus:border-[#D4AF37]"
+                  className="w-full px-2.5 py-1 bg-[#161616] border border-[#222222] rounded-lg text-[11px] text-[#CCCCCC] focus:outline-none focus:border-[#D4AF37]"
                 />
               </div>
             </div>
@@ -1062,7 +1117,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             <div className="p-4 sm:p-6 overflow-y-auto bg-[#0A0A0A] flex-1">
               <div
                 id="student-pin-printable-sheet"
-                className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-5 sm:p-6 shadow-inner text-left"
+                className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-5 sm:p-6 shadow-inner text-left"
               >
                 {/* Print Sheet Header Preview */}
                 <div className="border-b border-[#262626] pb-3 mb-5 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
@@ -1092,7 +1147,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     {state.students.map((student) => (
                       <div
                         key={student.id}
-                        className="border border-dashed border-[#333333] hover:border-[#D4AF37]/60 p-3.5 rounded-xs bg-[#161616] flex flex-col justify-between transition-colors relative group"
+                        className="border border-dashed border-[#333333] hover:border-[#D4AF37]/60 p-3.5 rounded-xl bg-[#161616] flex flex-col justify-between transition-colors relative group"
                       >
                         <div>
                           <div className="flex items-center justify-between border-b border-[#222222] pb-1.5 mb-2">
@@ -1111,7 +1166,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                         </div>
 
                         <div>
-                          <div className="my-2 bg-[#0A0A0A] border border-[#262626] py-2 px-3 rounded-xs text-center">
+                          <div className="my-2 bg-[#0A0A0A] border border-[#262626] py-2 px-3 rounded-lg text-center">
                             <span className="text-[8.5px] font-mono text-[#777777] uppercase tracking-widest block mb-0.5">
                               Your 4-Digit Login PIN
                             </span>
@@ -1141,7 +1196,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   </div>
                 ) : (
                   /* Ledger Table Preview */
-                  <div className="overflow-x-auto border border-[#222222] rounded-xs">
+                  <div className="overflow-x-auto border border-[#222222] rounded-xl">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
                         <tr className="bg-[#181818] border-b border-[#262626] font-mono text-[9.5px] uppercase tracking-wider text-[#888888]">
@@ -1190,7 +1245,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 <button
                   type="button"
                   onClick={handlePrintSheet}
-                  className="px-4 py-1.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-xs uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                  className="px-4 py-1.5 bg-[#D4AF37] hover:bg-[#E5C158] text-[#0A0A0A] font-semibold rounded-lg uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
                 >
                   <Printer className="w-3.5 h-3.5" />
                   <span>Send to Printer</span>
@@ -1204,7 +1259,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       {/* Share Class Link Modal */}
       {showShareModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-[#121212] border border-[#2A2A2A] rounded-sm max-w-lg w-full p-6 shadow-2xl space-y-5">
+          <div className="bg-[#121212] border border-[#2A2A2A] rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-[#222222] pb-3">
               <div className="flex items-center gap-2">
                 <Globe className="w-5 h-5 text-[var(--gold)]" />
@@ -1227,12 +1282,12 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               </p>
 
               {/* Class Code & Direct Link */}
-              <div className="bg-[#181818] border border-[#2A2A2A] rounded-xs p-4 space-y-3">
+              <div className="bg-[#181818] border border-[#2A2A2A] rounded-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-[#888888]">
                     Classroom Code
                   </span>
-                  <span className="font-mono text-sm font-bold text-[var(--gold)] bg-[#222222] px-2.5 py-0.5 rounded-xs">
+                  <span className="font-mono text-sm font-bold text-[var(--gold)] bg-[#222222] px-2.5 py-0.5 rounded-md">
                     {state.classCode}
                   </span>
                 </div>
@@ -1246,12 +1301,12 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                       type="text"
                       readOnly
                       value={getStudentShareUrl()}
-                      className="w-full px-3 py-2 bg-[#0E0E0E] border border-[#333333] rounded-xs text-xs font-mono text-white select-all focus:outline-none"
+                      className="w-full px-3 py-2 bg-[#0E0E0E] border border-[#333333] rounded-lg text-xs font-mono text-white select-all focus:outline-none"
                     />
                     <button
                       type="button"
                       onClick={handleCopyShareLink}
-                      className="px-4 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-black font-mono font-bold text-xs uppercase tracking-wider rounded-xs cursor-pointer transition shrink-0 flex items-center gap-1.5"
+                      className="px-4 py-2 bg-[var(--gold)] hover:bg-[#E5C158] text-black font-mono font-bold text-xs uppercase tracking-wider rounded-lg cursor-pointer transition shrink-0 flex items-center gap-1.5"
                     >
                       {copiedShareLink ? (
                         <>
@@ -1270,7 +1325,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               </div>
 
               {/* Instructions */}
-              <div className="text-[11px] font-mono text-[#888888] space-y-1.5 bg-[#161616] p-3 rounded-xs border border-[#202020]">
+              <div className="text-[11px] font-mono text-[#888888] space-y-1.5 bg-[#161616] p-3 rounded-xl border border-[#202020]">
                 <div className="text-[#CCCCCC] font-medium mb-1">How students connect:</div>
                 <div className="flex items-start gap-2">
                   <span className="text-[var(--gold)] font-bold">1.</span>
@@ -1291,7 +1346,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
               <button
                 type="button"
                 onClick={() => setShowShareModal(false)}
-                className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+                className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-white text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition"
               >
                 Done
               </button>
@@ -1303,11 +1358,11 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       {/* Copy Students from Another Class Modal */}
       {showCopyModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-[#121212] border border-[#2A2A2A] rounded-sm max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+          <div className="bg-[#121212] border border-[#2A2A2A] rounded-2xl max-w-xl w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-[#222222] flex items-center justify-between shrink-0 bg-[#161616]">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xs bg-[var(--gold)]/10 border border-[var(--gold)]/30 flex items-center justify-center text-[var(--gold)]">
+                <div className="w-8 h-8 rounded-lg bg-[var(--gold)]/10 border border-[var(--gold)]/30 flex items-center justify-center text-[var(--gold)]">
                   <FolderInput className="w-4 h-4" />
                 </div>
                 <div>
@@ -1331,7 +1386,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             {/* Modal Body */}
             <div className="p-4 sm:p-5 space-y-4 overflow-y-auto flex-1 text-xs">
               {availableSourceClasses.length === 0 ? (
-                <div className="p-6 text-center border border-dashed border-[#262626] rounded-xs space-y-2 bg-[#161616]">
+                <div className="p-6 text-center border border-dashed border-[#262626] rounded-xl space-y-2 bg-[#161616]">
                   <Users className="w-8 h-8 text-[#666666] mx-auto" />
                   <p className="font-serif italic text-white text-base">No other classes available</p>
                   <p className="text-[#888888] text-[11px] font-mono">
@@ -1348,7 +1403,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                     <select
                       value={sourceClassId}
                       onChange={(e) => handleSelectSourceClass(e.target.value)}
-                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[#444444] rounded-xs text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
+                      className="w-full px-3 py-2 bg-[#1A1A1A] border border-[#2F2F2F] hover:border-[#444444] rounded-lg text-xs text-white focus:outline-none focus:border-[var(--gold)] font-mono"
                     >
                       {availableSourceClasses.map((cls) => (
                         <option key={cls.id} value={cls.id}>
@@ -1372,7 +1427,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                                 value={copySearchQuery}
                                 onChange={(e) => setCopySearchQuery(e.target.value)}
                                 placeholder="Filter student names..."
-                                className="w-full pl-8 pr-3 py-1.5 bg-[#181818] border border-[#2A2A2A] rounded-xs text-xs text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] font-sans"
+                                className="w-full pl-8 pr-3 py-1.5 bg-[#181818] border border-[#2A2A2A] rounded-lg text-xs text-white placeholder:text-[#555555] focus:outline-none focus:border-[#444444] font-sans"
                               />
                             </div>
 
@@ -1386,7 +1441,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                                     .map((s) => s.id);
                                   setSelectedStudentIdsToCopy(filtered);
                                 }}
-                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#CCCCCC] hover:text-white rounded-xs transition cursor-pointer"
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#CCCCCC] hover:text-white rounded-md transition cursor-pointer"
                               >
                                 Select All ({currentSourceClass.students.length})
                               </button>
@@ -1399,14 +1454,14 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                                     .map((s) => s.id);
                                   setSelectedStudentIdsToCopy(nonEnrolled);
                                 }}
-                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[var(--gold)] rounded-xs transition cursor-pointer"
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[var(--gold)] rounded-md transition cursor-pointer"
                               >
                                 Select Non-Enrolled
                               </button>
                               <button
                                 type="button"
                                 onClick={() => setSelectedStudentIdsToCopy([])}
-                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white rounded-xs transition cursor-pointer"
+                                className="px-2 py-1 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white rounded-md transition cursor-pointer"
                               >
                                 Clear
                               </button>
@@ -1414,7 +1469,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                           </div>
 
                           {/* Student Selection List */}
-                          <div className="border border-[#222222] rounded-xs bg-[#151515] max-h-52 overflow-y-auto divide-y divide-[#1F1F1F]">
+                          <div className="border border-[#222222] rounded-xl bg-[#151515] max-h-52 overflow-y-auto divide-y divide-[#1F1F1F]">
                             {currentSourceClass.students
                               .filter((s) => s.name.toLowerCase().includes(copySearchQuery.toLowerCase()))
                               .map((student) => {
@@ -1451,7 +1506,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                                         {student.name}
                                       </span>
                                       {isAlreadyInClass && (
-                                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-xs bg-[#242424] text-[#888888] border border-[#333333]">
+                                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded-md bg-[#242424] text-[#888888] border border-[#333333]">
                                           Already enrolled
                                         </span>
                                       )}
@@ -1459,7 +1514,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
 
                                     <div className="flex items-center gap-2 font-mono text-[11px]">
                                       <span className="text-[#666666]">PIN:</span>
-                                      <span className="bg-[#242424] text-[var(--gold)] px-1.5 py-0.5 rounded-xs font-bold">
+                                      <span className="bg-[#242424] text-[var(--gold)] px-1.5 py-0.5 rounded-md font-bold">
                                         {student.pin}
                                       </span>
                                     </div>
@@ -1469,13 +1524,13 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                           </div>
 
                           {/* Options Checklist */}
-                          <div className="bg-[#181818] border border-[#242424] rounded-xs p-3 space-y-2.5 font-mono text-[11px]">
+                          <div className="bg-[#181818] border border-[#242424] rounded-xl p-3 space-y-2.5 font-mono text-[11px]">
                             <label className="flex items-center gap-2 cursor-pointer text-[#CCCCCC] hover:text-white">
                               <input
                                 type="checkbox"
                                 checked={copyPreservePins}
                                 onChange={(e) => setCopyPreservePins(e.target.checked)}
-                                className="accent-[var(--gold)] rounded-xs cursor-pointer"
+                                className="accent-[var(--gold)] rounded-sm cursor-pointer"
                               />
                               <span>Preserve original 4-digit PINs (Students keep the same PINs across classes)</span>
                             </label>
@@ -1485,14 +1540,14 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                                 type="checkbox"
                                 checked={copySkipDuplicates}
                                 onChange={(e) => setCopySkipDuplicates(e.target.checked)}
-                                className="accent-[var(--gold)] rounded-xs cursor-pointer"
+                                className="accent-[var(--gold)] rounded-sm cursor-pointer"
                               />
                               <span>Skip duplicate students (Avoid adding same student name twice)</span>
                             </label>
                           </div>
                         </div>
                       ) : (
-                        <div className="p-6 text-center border border-dashed border-[#222222] rounded-xs text-[#888888]">
+                        <div className="p-6 text-center border border-dashed border-[#222222] rounded-xl text-[#888888]">
                           Source class "{currentSourceClass.className}" has 0 students enrolled.
                         </div>
                       )}
@@ -1512,7 +1567,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowCopyModal(false)}
-                  className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white text-xs font-mono uppercase tracking-wider rounded-xs cursor-pointer transition"
+                  className="px-4 py-2 bg-[#202020] hover:bg-[#2A2A2A] text-[#888888] hover:text-white text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition"
                 >
                   Cancel
                 </button>
@@ -1520,7 +1575,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   type="button"
                   onClick={handleExecuteCopyStudents}
                   disabled={selectedStudentIdsToCopy.length === 0 || !currentSourceClass}
-                  className={`px-4 py-2 font-mono font-bold text-xs uppercase tracking-wider rounded-xs transition cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-4 py-2 font-mono font-bold text-xs uppercase tracking-wider rounded-lg transition cursor-pointer flex items-center gap-1.5 ${
                     selectedStudentIdsToCopy.length > 0 && currentSourceClass
                       ? 'bg-[var(--gold)] hover:bg-[#E5C158] text-black shadow-[0_0_12px_rgba(212,175,55,0.2)]'
                       : 'bg-[#262626] text-[#555555] cursor-not-allowed'

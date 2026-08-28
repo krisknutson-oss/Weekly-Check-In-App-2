@@ -95,7 +95,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
           playClickSound();
           setIsOpen(!isOpen);
         }}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-sm bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-[#888888] hover:text-white transition cursor-pointer text-[10px] uppercase tracking-wider font-mono select-none"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] text-[#888888] hover:text-white transition cursor-pointer text-[10px] uppercase tracking-wider font-mono select-none"
         title="Change Background & Colour Theme"
       >
         <Palette className="w-3.5 h-3.5 text-[var(--gold)]" />
@@ -108,7 +108,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
 
       {/* Dropdown Modal */}
       {isOpen && (
-        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-[#141414] border border-[#262626] rounded-sm p-3.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-left">
+        <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-[#141414] border border-[#262626] rounded-xl p-4 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 text-left">
           {/* Header */}
           <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-[#222222]">
             <div className="flex items-center gap-1.5 text-xs font-mono font-semibold uppercase tracking-wider text-white">
@@ -121,7 +121,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
           </div>
 
           {/* Day / Night / Custom Mode Tabs */}
-          <div className="grid grid-cols-3 gap-1 p-1 bg-[#0A0A0A] border border-[#1F1F1F] rounded-xs mb-3">
+          <div className="grid grid-cols-3 gap-1 p-1 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg mb-3">
             <button
               id="theme-tab-night"
               type="button"
@@ -132,7 +132,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                   handleSelectScheme('sophisticated-dark');
                 }
               }}
-              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-xs transition cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-md transition cursor-pointer ${
                 activeTab === 'night'
                   ? 'bg-[#1F1F1F] text-white border border-[#333333] shadow-xs'
                   : 'text-[#888888] hover:text-white'
@@ -152,7 +152,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                   handleSelectScheme('pure-white');
                 }
               }}
-              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-xs transition cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-md transition cursor-pointer ${
                 activeTab === 'day'
                   ? 'bg-[#E5C158] text-[#0A0A0A] font-semibold shadow-xs'
                   : 'text-[#888888] hover:text-white'
@@ -169,7 +169,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                 playClickSound();
                 setActiveTab('custom');
               }}
-              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-xs transition cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-1.5 text-[10px] uppercase font-mono font-medium rounded-md transition cursor-pointer ${
                 activeTab === 'custom'
                   ? 'bg-[#1F1F1F] text-white border border-[#333333] shadow-xs'
                   : 'text-[#888888] hover:text-white'
@@ -194,7 +194,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                     id={`theme-option-${scheme.id}`}
                     type="button"
                     onClick={() => handleSelectScheme(scheme.id)}
-                    className={`w-full text-left p-2.5 rounded-xs border transition flex items-center justify-between gap-3 cursor-pointer group ${
+                    className={`w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between gap-3 cursor-pointer group ${
                       isSelected
                         ? 'bg-[#1C1C1C] border-[var(--gold)] shadow-[0_0_12px_rgba(212,175,55,0.15)]'
                         : 'bg-[#101010] border-[#222222] hover:bg-[#181818] hover:border-[#333333]'
@@ -246,7 +246,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                     id={`theme-option-${scheme.id}`}
                     type="button"
                     onClick={() => handleSelectScheme(scheme.id)}
-                    className={`w-full text-left p-2.5 rounded-xs border transition flex items-center justify-between gap-3 cursor-pointer group ${
+                    className={`w-full text-left p-2.5 rounded-lg border transition flex items-center justify-between gap-3 cursor-pointer group ${
                       isSelected
                         ? 'bg-[#1C1C1C] border-[var(--gold)] shadow-[0_0_12px_rgba(212,175,55,0.15)]'
                         : 'bg-[#101010] border-[#222222] hover:bg-[#181818] hover:border-[#333333]'
@@ -292,13 +292,13 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
               </div>
 
               {/* Color input control */}
-              <div className="flex items-center gap-2.5 bg-[#0A0A0A] border border-[#222222] p-2 rounded-xs">
+              <div className="flex items-center gap-2.5 bg-[#0A0A0A] border border-[#222222] p-2 rounded-lg">
                 <input
                   type="color"
                   id="custom-bg-color-picker"
                   value={customBg.startsWith('#') ? customBg : '#0A0A0A'}
                   onChange={(e) => handleCustomColorChange(e.target.value)}
-                  className="w-8 h-8 rounded-xs border border-white/20 cursor-pointer bg-transparent p-0"
+                  className="w-8 h-8 rounded-md border border-white/20 cursor-pointer bg-transparent p-0"
                   title="Pick background color"
                 />
                 <div className="flex-1">
@@ -341,7 +341,7 @@ export const ThemeSelector: React.FC<ThemeSelectorProps> = ({
                       key={preset.hex}
                       type="button"
                       onClick={() => handleCustomColorChange(preset.hex)}
-                      className={`flex items-center gap-2 p-1.5 rounded-xs border text-[10px] font-mono transition cursor-pointer ${
+                      className={`flex items-center gap-2 p-1.5 rounded-md border text-[10px] font-mono transition cursor-pointer ${
                         customBg.toLowerCase() === preset.hex.toLowerCase() && currentTheme === 'custom-bg'
                           ? 'border-[var(--gold)] bg-[#1C1C1C] text-white'
                           : 'border-[#222222] bg-[#101010] text-[#888888] hover:text-white hover:border-[#333333]'

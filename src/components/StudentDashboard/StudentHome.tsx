@@ -33,9 +33,9 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
       {/* Student Welcome Banner */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] inline-block px-2.5 py-0.5 rounded-xs mb-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] inline-block px-2.5 py-1 rounded-md mb-2">
             Student Weekly Ledger
           </span>
           <h2 className="font-serif italic text-3xl text-white">
@@ -72,7 +72,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
         </div>
 
         {publishedWeeks.length === 0 ? (
-          <div className="bg-[#121212] border border-dashed border-[#1F1F1F] rounded-xs p-10 text-center shadow-lg">
+          <div className="bg-[#121212] border border-dashed border-[#1F1F1F] rounded-2xl p-10 text-center shadow-lg">
             <BookOpen className="w-10 h-10 text-[#666666] mx-auto mb-2" />
             <h4 className="font-serif italic text-lg text-white mb-1">
               No Quizzes Published Yet
@@ -90,11 +90,11 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
               return (
                 <div
                   key={week.id}
-                  className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-lg"
+                  className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-lg"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2.5">
-                      <span className="font-mono font-bold text-xs bg-[#D4AF37] text-black px-2 py-0.5 rounded-xs">
+                      <span className="font-mono font-bold text-xs bg-[#D4AF37] text-black px-2.5 py-0.5 rounded-md">
                         Week {idx + 1}
                       </span>
                       <h4 className="font-serif italic text-lg text-white">
@@ -129,7 +129,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                           playClickSound();
                           onViewFeedback(week);
                         }}
-                        className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#555555] text-white hover:text-white rounded-xs text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                        className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#555555] text-white hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
                       >
                         <Eye className="w-3.5 h-3.5 text-white" />
                         <span>Review Explanations</span>
@@ -141,7 +141,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                           playClickSound();
                           onStartQuiz(week);
                         }}
-                        className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-black rounded-xs text-xs font-mono font-bold uppercase tracking-widest transition cursor-pointer flex items-center gap-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                        className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-black rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition cursor-pointer flex items-center gap-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
                       >
                         <Play className="w-3.5 h-3.5 text-black fill-current" />
                         <span>Take Check-In</span>
@@ -156,7 +156,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
       </div>
 
       {/* Culminating Goal Note */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xs p-5 flex items-start gap-3 shadow-lg">
+      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xl p-5 flex items-start gap-3 shadow-lg">
         <Sparkles className="w-5 h-5 text-white shrink-0 mt-0.5" />
         <div>
           <h5 className="font-serif italic text-sm text-white">
