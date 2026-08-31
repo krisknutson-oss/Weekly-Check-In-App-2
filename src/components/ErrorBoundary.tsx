@@ -16,10 +16,22 @@ export class ErrorBoundary extends Component<Props, State> {
   };
 
   public static getDerivedStateFromError(error: Error): State {
+    if (error?.message && (
+      error.message.includes('ethereum') ||
+      error.message.includes('Cannot redefine property')
+    )) {
+      return { hasError: false, error: null };
+    }
     return { hasError: true, error };
   }
 
   public override componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (error?.message && (
+      error.message.includes('ethereum') ||
+      error.message.includes('Cannot redefine property')
+    )) {
+      return;
+    }
     console.error('App Error caught by boundary:', error, errorInfo);
   }
 
