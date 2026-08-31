@@ -53,19 +53,19 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Teacher Card */}
         <div
           id="teacher-portal-card"
-          className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] hover:border-white/[0.2] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] hover:-translate-y-1"
+          className="bg-gradient-to-br from-[#3D3526] via-[#322A1E] to-[#282117] border border-[#6B5A3E] hover:border-[#D4AF37] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:-translate-y-1"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[var(--gold)] px-3 py-1 rounded-full shadow-xs">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[var(--gold)] px-3 py-1 rounded-full shadow-sm">
                 Staff &middot; Co-Teachers
               </span>
-              <Shield className="w-5 h-5 text-[#888888] group-hover:text-[var(--gold)] transition-colors" />
+              <Shield className="w-5 h-5 text-[#E6C673] group-hover:text-[var(--gold)] transition-colors" />
             </div>
-            <h3 className="font-serif italic text-2xl text-white mb-2.5">
+            <h3 className="font-serif italic text-2xl text-[#FFFDF8] mb-2.5">
               Teacher Dashboard
             </h3>
-            <p className="text-xs md:text-sm text-[#888888] leading-relaxed mb-6 font-light">
+            <p className="text-xs md:text-sm text-[#E2D8C7] leading-relaxed mb-6 font-normal">
               Create weeks, drag &amp; drop PowerPoint (.pptx) decks, auto-generate and edit 20-question quizzes, manage PIN codes, and inspect class struggle analytics.
             </p>
           </div>
@@ -74,11 +74,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <button
               id="go-teacher-btn"
               onClick={handleTeacherClick}
-              className="w-full py-3.5 px-4 bg-gradient-to-b from-[#222222] to-[#161616] hover:from-[#2a2a2a] hover:to-[#1e1e1e] border border-white/[0.1] hover:border-white/[0.2] text-white font-medium rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] active:scale-98"
+              className="w-full py-3.5 px-4 bg-gradient-to-b from-[#F3DF95] via-[#E5C158] to-[#CCA330] hover:brightness-105 border border-[#FDE68A] text-black font-bold rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_6px_20px_rgba(212,175,55,0.3)] active:scale-98"
             >
-              <LogIn className="w-3.5 h-3.5 text-[var(--gold)]" />
+              <LogIn className="w-4 h-4 text-black" />
               <span>Teacher Login / Dashboard</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 text-black" />
             </button>
           </div>
         </div>
@@ -86,19 +86,19 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Student Card */}
         <div
           id="student-portal-card"
-          className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] hover:border-white/[0.2] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] hover:-translate-y-1"
+          className="bg-gradient-to-br from-[#244234] via-[#1C3529] to-[#162A20] border border-[#3E7056] hover:border-[#4ADE80] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_12px_32px_rgba(0,0,0,0.35)] hover:-translate-y-1"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#22C55E] px-3 py-1 rounded-full shadow-xs">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#4ADE80] px-3 py-1 rounded-full shadow-sm">
                 Roster &middot; Students
               </span>
-              <Award className="w-5 h-5 text-[#888888] group-hover:text-[#22C55E] transition-colors" />
+              <Award className="w-5 h-5 text-[#86EFAC] group-hover:text-[#4ADE80] transition-colors" />
             </div>
-            <h3 className="font-serif italic text-2xl text-white mb-2.5">
+            <h3 className="font-serif italic text-2xl text-[#F2FCF5] mb-2.5">
               Student Portal
             </h3>
-            <p className="text-xs md:text-sm text-[#888888] leading-relaxed mb-6 font-light">
+            <p className="text-xs md:text-sm text-[#D1EBE0] leading-relaxed mb-6 font-normal">
               Log in with your 4-digit PIN, complete your weekly 20-question check-in, receive instant feedback with explanations, and view your personal progress trend.
             </p>
           </div>
@@ -106,7 +106,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
           <button
             id="go-student-btn"
             onClick={handleStudentClick}
-            className="w-full py-3.5 px-4 bg-gradient-to-b from-[var(--gold-light,#E5C158)] to-[var(--gold,#D4AF37)] hover:brightness-110 text-black font-bold rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_6px_20px_rgba(212,175,55,0.35),inset_0_1px_0_rgba(255,255,255,0.4)] active:scale-98"
+            className="w-full py-3.5 px-4 bg-gradient-to-b from-[#4ADE80] to-[#22C55E] hover:brightness-105 text-black font-bold rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_6px_20px_rgba(34,197,94,0.3)] active:scale-98"
           >
             <span>Open Student Portal</span>
             <ArrowRight className="w-3.5 h-3.5 text-black" />
@@ -115,25 +115,28 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </div>
 
       {/* Classroom Status Snapshot */}
-      <div className="w-full max-w-3xl bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-6 sm:p-8 text-left shadow-[0_12px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
+      <div className="w-full max-w-3xl bg-gradient-to-br from-[#F4F8FE] to-[#EAF2FC] border-2 border-blue-500/80 rounded-3xl p-6 sm:p-8 text-left shadow-[0_12px_32px_rgba(37,99,235,0.12)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-[#777777] mb-1 font-mono">Active Course</div>
-            <h4 className="font-serif italic text-xl text-white">
+            <div className="text-[11px] uppercase tracking-widest text-blue-700 font-bold mb-1 font-mono flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
+              Active Course
+            </div>
+            <h4 className="font-serif italic text-2xl text-gray-950 font-bold tracking-tight">
               {state.className}
             </h4>
-            <p className="text-xs text-[#888888] mt-1 font-light">
-              Culminating Goal: <span className="text-[#E0E0E0]">{state.culminatingActivityTitle || state.unitGoal}</span>
+            <p className="text-xs text-gray-700 mt-1 font-medium">
+              Culminating Goal: <span className="text-gray-950 font-bold">{state.culminatingActivityTitle || state.unitGoal}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-gradient-to-b from-[#1E1E1E] to-[#141414] border border-white/[0.08] px-4 py-2 rounded-2xl shadow-inner">
-              <div className="text-[9px] uppercase tracking-widest text-[#777777] font-mono">Roster</div>
-              <div className="font-mono text-xs font-semibold text-white">{totalStudents} Enrolled</div>
+            <div className="bg-white/90 border border-blue-200/90 px-4 py-2.5 rounded-2xl text-center shadow-xs">
+              <div className="text-[9px] uppercase tracking-widest text-blue-800 font-bold font-mono">Roster</div>
+              <div className="font-mono text-sm font-extrabold text-gray-900 mt-0.5">{totalStudents} Enrolled</div>
             </div>
-            <div className="bg-gradient-to-b from-[#1E1E1E] to-[#141414] border border-white/[0.08] px-4 py-2 rounded-2xl shadow-inner">
-              <div className="text-[9px] uppercase tracking-widest text-[#777777] font-mono">Modules</div>
-              <div className="font-mono text-xs font-bold text-black bg-[var(--gold)] px-2.5 py-0.5 rounded-full mt-0.5">{publishedCount} Published</div>
+            <div className="bg-white/90 border border-blue-200/90 px-4 py-2.5 rounded-2xl text-center shadow-xs">
+              <div className="text-[9px] uppercase tracking-widest text-blue-800 font-bold font-mono">Modules</div>
+              <div className="font-mono text-xs font-extrabold text-blue-950 bg-amber-300 border border-amber-400 px-2.5 py-0.5 rounded-full mt-0.5 inline-block">{publishedCount} Published</div>
             </div>
           </div>
         </div>
