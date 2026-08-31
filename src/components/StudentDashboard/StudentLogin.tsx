@@ -7,7 +7,9 @@ import {
   saveLastSelectedStudentClass,
   getLastSelectedStudentClass,
   loadAppStore,
+  saveAppStore,
 } from '../../utils/storage';
+import { fetchClassByCode } from '../../utils/firebaseSync';
 import { playClickSound, playSuccessChime } from '../../utils/sound';
 import {
   KeyRound,
@@ -83,7 +85,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
   const [selectedStudentId, setSelectedStudentId] = useState<string>('');
   const [pin, setPin] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-  const [filterQuery, setFilterQuery] = useState('');
+  const [searchingCode, setSearchingCode] = useState(false);
 
   // Refresh active class data when selected class changes
   useEffect(() => {
@@ -119,19 +121,43 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
     setErrorMessage('');
   };
 
-  const handleSearchClassCode = (e: React.FormEvent) => {
+  const handleSearchClassCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage('');
     const code = classCodeInput.trim().toUpperCase();
     if (!code) return;
 
-    const matched = classesList.find((c) => c.classCode.toUpperCase() === code);
+    setSearchingCode(true);
+    let matched = classesList.find((c) => c.classCode.toUpperCase() === code);
+    if (!matched) {
+      try {
+        const cloudClass = await fetchClassByCode(code);
+        if (cloudClass) {
+          const store = loadAppStore();
+          if (!store.classes.some((c) => c.id === cloudClass.id)) {
+            store.classes.push(cloudClass);
+            saveAppStore(store);
+          }
+          setActiveClassData(cloudClass);
+          setSelectedClassId(cloudClass.id);
+          setClassCodeInput('');
+          setClassesList(getPublicClassesList());
+          playSuccessChime();
+          setSearchingCode(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Class lookup failed:', err);
+      }
+    }
+
+    setSearchingCode(false);
     if (matched) {
       playClickSound();
       setSelectedClassId(matched.id);
       setClassCodeInput('');
     } else {
-      setErrorMessage(`No classroom found with code "${code}". Please check with your teacher.`);
+      setErrorMessage(`No classroom found with code "${code}". Please verify the code with your teacher.`);
     }
   };
 
@@ -174,7 +200,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
           playClickSound();
           onBack();
         }}
-        className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[#888888] hover:text-white mb-6 cursor-pointer transition"
+        className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-[#888888] hover:text-white mb-6 cursor-pointer transition px-3 py-1.5 rounded-xl hover:bg-white/[0.05]"
       >
         <ArrowLeft className="w-3.5 h-3.5" />
         <span>Return to Home</span>
@@ -182,12 +208,12 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
 
       {/* Header */}
       <div className="flex items-center gap-3.5 mb-6">
-        <div className="w-11 h-11 rounded-full bg-[#161616] border border-[#1F1F1F] text-white flex items-center justify-center font-bold shadow-[0_0_15px_rgba(212,175,55,0.1)] shrink-0">
-          <GraduationCap className="w-6 h-6 text-white" />
+        <div className="w-12 h-12 rounded-2xl bg-gradient-to-b from-[#222222] to-[#141414] border border-white/[0.1] text-white flex items-center justify-center font-bold shadow-[0_8px_20px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.15)] shrink-0">
+          <GraduationCap className="w-6 h-6 text-[var(--gold)]" />
         </div>
         <div>
-          <h2 className="font-serif italic text-2xl text-white">
-            Student Check-In Portal<span className="text-[#888888]">.</span>
+          <h2 className="font-serif italic text-2xl sm:text-3xl text-white">
+            Student Check-In Portal<span className="text-[var(--gold)]">.</span>
           </h2>
           <p className="text-xs font-mono text-[#888888]">
             Select your teacher’s class and enter your 4-digit PIN
@@ -196,32 +222,32 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
       </div>
 
       {/* Class Selection Section (Multi-Class / Multi-Teacher Isolation) */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-4 sm:p-5 mb-5 shadow-xl space-y-3">
+      <div className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-5 mb-5 shadow-[0_12px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.08)] space-y-3">
         <div className="flex items-center justify-between flex-wrap gap-2">
           <label
             htmlFor="teacher-class-select"
             className="text-[10px] font-mono uppercase tracking-[0.2em] text-[#CCCCCC] font-semibold flex items-center gap-1.5"
           >
-            <School className="w-3.5 h-3.5 text-white" />
+            <School className="w-3.5 h-3.5 text-[var(--gold)]" />
             <span>1. Choose Teacher &amp; Class</span>
           </label>
           {activeClassData && (
-            <span className="text-[10px] font-mono text-[#888888] bg-[#161616] border border-[#222222] px-2.5 py-1 rounded-md">
-              Code: <strong className="text-white">{activeClassData.classCode}</strong>
+            <span className="text-[10px] font-mono text-[var(--gold)] bg-[var(--gold)]/10 border border-[var(--gold)]/30 px-3 py-1 rounded-full shadow-inner">
+              Code: <strong className="text-white font-bold">{activeClassData.classCode}</strong>
             </span>
           )}
         </div>
 
         {classesList.length > 1 ? (
-          <div className="space-y-2">
+          <div className="space-y-2.5">
             <select
               id="teacher-class-select"
               value={selectedClassId}
               onChange={(e) => handleSelectClass(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#262626] rounded-xl text-xs text-white focus:outline-none focus:border-[#555555] cursor-pointer"
+              className="w-full px-4 py-3 bg-[#161616] border border-white/[0.08] rounded-2xl text-xs text-white focus:outline-none focus:border-[var(--gold)]/60 cursor-pointer shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
             >
               {classesList.map((cls) => (
-                <option key={cls.id} value={cls.id} className="bg-[#161616] text-white py-1">
+                <option key={cls.id} value={cls.id} className="bg-[#161616] text-white py-1.5">
                   {cls.teacherName} &mdash; {cls.className} ({cls.studentCount} students)
                 </option>
               ))}
@@ -234,28 +260,29 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                 value={classCodeInput}
                 onChange={(e) => setClassCodeInput(e.target.value)}
                 placeholder="Or enter Class Code (e.g. SCI-301)"
-                className="flex-1 px-3.5 py-2 bg-[#0D0D0D] border border-[#222222] text-xs font-mono uppercase text-white rounded-lg focus:outline-none focus:border-[#555555] placeholder:text-[#555555]"
+                className="flex-1 px-4 py-2.5 bg-[#0E0E0E] border border-white/[0.08] text-xs font-mono uppercase text-white rounded-xl focus:outline-none focus:border-[var(--gold)]/60 placeholder:text-[#555555] shadow-inner"
               />
               <button
                 type="submit"
-                className="px-3.5 py-2 bg-[#1C1C1C] hover:bg-[#262626] border border-[#333333] text-white text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition flex items-center gap-1.5"
+                disabled={searchingCode}
+                className="px-4 py-2.5 bg-gradient-to-b from-[#252525] to-[#191919] hover:from-[#2e2e2e] hover:to-[#222222] border border-white/[0.1] text-white text-xs font-mono uppercase tracking-wider rounded-xl cursor-pointer transition flex items-center gap-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.12)] active:scale-98"
               >
-                <Search className="w-3 h-3 text-white" />
-                <span>Find</span>
+                <Search className="w-3.5 h-3.5 text-[var(--gold)]" />
+                <span>{searchingCode ? 'Searching...' : 'Find'}</span>
               </button>
             </form>
           </div>
         ) : (
-          <div className="p-3.5 bg-[#161616] border border-[#222222] rounded-xl flex items-center justify-between">
+          <div className="p-4 bg-gradient-to-b from-[#161616] to-[#121212] border border-white/[0.07] rounded-2xl flex items-center justify-between shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
             <div>
-              <div className="text-xs font-medium text-white">
+              <div className="text-xs font-semibold text-white">
                 {activeClassData?.className || state.className}
               </div>
               <div className="text-[11px] font-mono text-[#888888] mt-0.5">
                 Instructor: {classesList[0]?.teacherName || 'Faculty'} &middot; Code: {activeClassData?.classCode || 'SCI-301'}
               </div>
             </div>
-            <span className="text-[10px] font-mono text-black font-bold bg-[#D4AF37] px-2.5 py-1 rounded-md">
+            <span className="text-[10px] font-mono text-black font-bold bg-[var(--gold)] px-3 py-1 rounded-full shadow-[0_2px_8px_rgba(212,175,55,0.3)]">
               {currentStudents.length} Students
             </span>
           </div>
@@ -264,8 +291,8 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
 
       {/* Student PIN Input Card */}
       {currentStudents.length === 0 ? (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-8 text-center shadow-xl">
-          <AlertCircle className="w-8 h-8 text-[#EF4444] mx-auto mb-2" />
+        <div className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-8 text-center shadow-[0_12px_32px_rgba(0,0,0,0.6)]">
+          <AlertCircle className="w-9 h-9 text-[#EF4444] mx-auto mb-2" />
           <h4 className="font-serif italic text-lg text-white mb-1">
             No Students in This Class Yet
           </h4>
@@ -274,15 +301,15 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
           </p>
           <button
             onClick={onBack}
-            className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] text-white rounded-lg text-xs font-mono uppercase tracking-wider cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-b from-[#222222] to-[#161616] border border-white/[0.1] text-white rounded-xl text-xs font-mono uppercase tracking-wider cursor-pointer shadow-md"
           >
             Back to Home
           </button>
         </div>
       ) : (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+        <div className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-6 sm:p-8 shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] space-y-6">
           {errorMessage && (
-            <div className="bg-[#EF4444]/10 border-l-2 border-[#EF4444] p-3.5 text-xs text-[#EF4444] flex items-start gap-2 rounded-r-lg font-mono">
+            <div className="bg-[#EF4444]/10 border border-[#EF4444]/30 p-4 text-xs text-[#EF4444] flex items-start gap-2.5 rounded-2xl font-mono shadow-inner">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
@@ -293,7 +320,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             <div>
               <label
                 htmlFor="student-select"
-                className="block text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] mb-1.5"
+                className="block text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] mb-2 font-medium"
               >
                 2. Select Your Name
               </label>
@@ -306,10 +333,10 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                   setPin('');
                   setErrorMessage('');
                 }}
-                className="w-full px-3.5 py-2.5 bg-[#161616] border border-[#1F1F1F] rounded-xl text-sm text-white focus:outline-none focus:border-[var(--gold)] cursor-pointer"
+                className="w-full px-4 py-3 bg-[#151515] border border-white/[0.08] rounded-2xl text-sm text-white focus:outline-none focus:border-[var(--gold)]/60 cursor-pointer shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]"
               >
                 {currentStudents.map((student) => (
-                  <option key={student.id} value={student.id} className="bg-[#161616] text-white">
+                  <option key={student.id} value={student.id} className="bg-[#161616] text-white py-1">
                     {student.name}
                   </option>
                 ))}
@@ -320,7 +347,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             <div>
               <label
                 htmlFor="student-pin-input"
-                className="block text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] mb-1.5"
+                className="block text-[10px] font-mono uppercase tracking-[0.2em] text-[#888888] mb-2 font-medium"
               >
                 3. Enter 4-Digit PIN
               </label>
@@ -331,19 +358,19 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 placeholder="••••"
-                className="w-full px-4 py-3 bg-[#161616] border border-[#1F1F1F] rounded-xl text-center text-2xl tracking-[0.5em] font-mono font-bold text-white focus:outline-none focus:border-white"
+                className="w-full px-4 py-3.5 bg-[#141414] border border-white/[0.08] rounded-2xl text-center text-2xl tracking-[0.5em] font-mono font-bold text-white focus:outline-none focus:border-[var(--gold)]/70 shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)]"
                 autoFocus
               />
             </div>
 
             {/* Quick On-Screen Number Keypad */}
-            <div className="grid grid-cols-3 gap-2 pt-1">
+            <div className="grid grid-cols-3 gap-2.5 pt-1">
               {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((digit) => (
                 <button
                   key={digit}
                   type="button"
                   onClick={() => handleKeypadPress(digit)}
-                  className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-lg text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
+                  className="py-3 bg-gradient-to-b from-[#1E1E1E] to-[#151515] hover:from-[#262626] hover:to-[#1C1C1C] border border-white/[0.08] hover:border-white/[0.18] rounded-2xl text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]"
                 >
                   {digit}
                 </button>
@@ -351,21 +378,21 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
               <button
                 type="button"
                 onClick={() => setPin('')}
-                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-lg text-xs font-mono uppercase tracking-wider text-[#888888] cursor-pointer"
+                className="py-3 bg-gradient-to-b from-[#141414] to-[#0E0E0E] hover:from-[#1A1A1A] hover:to-[#141414] border border-white/[0.06] rounded-2xl text-xs font-mono uppercase tracking-wider text-[#888888] hover:text-white cursor-pointer transition active:scale-95 shadow-inner"
               >
                 Clear
               </button>
               <button
                 type="button"
                 onClick={() => handleKeypadPress('0')}
-                className="py-2.5 bg-[#161616] hover:bg-[#1f1f1f] border border-[#1F1F1F] hover:border-[#333333] rounded-lg text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-xs"
+                className="py-3 bg-gradient-to-b from-[#1E1E1E] to-[#151515] hover:from-[#262626] hover:to-[#1C1C1C] border border-white/[0.08] hover:border-white/[0.18] rounded-2xl text-base font-mono font-bold text-white transition active:scale-95 cursor-pointer shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)]"
               >
                 0
               </button>
               <button
                 type="button"
                 onClick={handleKeypadBackspace}
-                className="py-2.5 bg-[#0A0A0A] hover:bg-[#161616] border border-[#1F1F1F] rounded-lg text-xs font-mono uppercase tracking-wider text-[#EF4444] cursor-pointer"
+                className="py-3 bg-gradient-to-b from-[#141414] to-[#0E0E0E] hover:from-[#1A1A1A] hover:to-[#141414] border border-white/[0.06] rounded-2xl text-xs font-mono uppercase tracking-wider text-[#EF4444] cursor-pointer transition active:scale-95 shadow-inner"
               >
                 ⌫
               </button>
@@ -375,7 +402,7 @@ export const StudentLogin: React.FC<StudentLoginProps> = ({
             <button
               type="submit"
               id="student-login-enter-btn"
-              className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-mono font-bold uppercase tracking-widest rounded-xl text-xs transition cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.2)] mt-3 flex items-center justify-center gap-2"
+              className="w-full py-4 px-4 bg-gradient-to-b from-[var(--gold-light,#E5C158)] to-[var(--gold,#D4AF37)] hover:brightness-110 text-black font-mono font-bold uppercase tracking-widest rounded-2xl text-xs transition cursor-pointer shadow-[0_8px_20px_rgba(212,175,55,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] active:scale-98 mt-3 flex items-center justify-center gap-2"
             >
               <KeyRound className="w-4 h-4 text-black" />
               <span>Enter Weekly Check-Ins</span>

@@ -8,6 +8,7 @@ import {
   saveAppStore,
   buildClassroomStateFromClass,
   getActiveClassForTeacher,
+  recordStudentSubmission,
 } from './utils/storage';
 import { getSavedColorScheme, saveColorScheme, applyColorSchemeToDOM } from './utils/theme';
 import {
@@ -15,6 +16,7 @@ import {
   subscribeToAllClasses,
   submitStudentQuizToCloud,
   subscribeSyncStatus,
+  signOutTeacherFromFirebase,
   SyncStatus,
 } from './utils/firebaseSync';
 import { Topbar } from './components/Topbar';
@@ -82,6 +84,22 @@ export default function App() {
       setState((prevState) => {
         const updatedDoc = cloudClasses.find((c) => c.id === prevState.id);
         if (updatedDoc) {
+          // Merge results deeply so all student answers across devices are preserved
+          const mergedResults: Record<string, Record<string, QuizSubmission>> = {
+            ...(prevState.results || {}),
+            ...(updatedDoc.results || {}),
+          };
+          const allStudentKeys = new Set([
+            ...Object.keys(prevState.results || {}),
+            ...Object.keys(updatedDoc.results || {}),
+          ]);
+          allStudentKeys.forEach((sId) => {
+            mergedResults[sId] = {
+              ...(prevState.results?.[sId] || {}),
+              ...(updatedDoc.results?.[sId] || {}),
+            };
+          });
+
           return {
             ...prevState,
             className: updatedDoc.className,
@@ -90,9 +108,9 @@ export default function App() {
             period: updatedDoc.period,
             unitGoal: updatedDoc.unitGoal,
             culminatingActivityTitle: updatedDoc.culminatingActivityTitle,
-            students: updatedDoc.students || [],
-            weeks: updatedDoc.weeks || [],
-            results: updatedDoc.results || {},
+            students: updatedDoc.students || prevState.students || [],
+            weeks: updatedDoc.weeks || prevState.weeks || [],
+            results: mergedResults,
           };
         }
         return prevState;
@@ -174,6 +192,9 @@ export default function App() {
 
   // Completely Log out of both Teacher & Student sessions
   const handleLogout = () => {
+    if (currentTeacher?.isGoogleAuth) {
+      signOutTeacherFromFirebase().catch(() => {});
+    }
     setCurrentTeacher(null);
     setCurrentStudent(null);
     setActiveWeek(null);
@@ -216,6 +237,11 @@ export default function App() {
       answers,
       submittedAt: Date.now(),
     };
+
+    // Update local store for this classroom
+    if (state.id) {
+      recordStudentSubmission(state.id, currentStudent.id, activeWeek.id, submission);
+    }
 
     const studentResults = { ...(state.results[currentStudent.id] || {}) };
     studentResults[activeWeek.id] = submission;

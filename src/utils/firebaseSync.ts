@@ -14,12 +14,60 @@ import {
   DocumentData,
   Firestore,
 } from 'firebase/firestore';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut as fbSignOut,
+  onAuthStateChanged,
+  User as FirebaseUser,
+  Auth,
+} from 'firebase/auth';
 import firebaseConfig from '../../firebase-applet-config.json';
 import { ClassroomData, AppLedgerStore, Teacher, QuizSubmission, Student } from '../types';
 
 // Initialize Firebase App
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 export const db: Firestore = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const auth: Auth = getAuth(app);
+
+// Configure Google Auth Provider
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+/**
+ * Sign in a teacher with Google via Firebase Auth
+ */
+export async function signInTeacherWithGoogle(): Promise<FirebaseUser> {
+  try {
+    setSyncStatus('syncing');
+    const result = await signInWithPopup(auth, googleProvider);
+    setSyncStatus('synced');
+    return result.user;
+  } catch (error) {
+    console.error('Google Sign In Error:', error);
+    setSyncStatus('error');
+    throw error;
+  }
+}
+
+/**
+ * Sign out teacher from Firebase
+ */
+export async function signOutTeacherFromFirebase(): Promise<void> {
+  try {
+    await fbSignOut(auth);
+  } catch (err) {
+    console.warn('Sign out error:', err);
+  }
+}
+
+/**
+ * Subscribe to Firebase Auth state changes
+ */
+export function subscribeAuthUser(callback: (user: FirebaseUser | null) => void): () => void {
+  return onAuthStateChanged(auth, callback);
+}
 
 // Collection References
 export const CLASSES_COLLECTION = 'classes';
@@ -56,13 +104,29 @@ export async function syncClassToCloud(classData: ClassroomData): Promise<void> 
   try {
     setSyncStatus('syncing');
     const classRef = doc(db, CLASSES_COLLECTION, classData.id);
+    const snap = await getDoc(classRef);
+    let mergedResults = classData.results || {};
+    if (snap.exists()) {
+      const remoteData = snap.data() as ClassroomData;
+      const remoteResults = remoteData.results || {};
+      // Deep merge remote results with local results so no student answers are lost
+      mergedResults = { ...remoteResults, ...mergedResults };
+      Object.keys(remoteResults).forEach((sId) => {
+        mergedResults[sId] = {
+          ...(remoteResults[sId] || {}),
+          ...(mergedResults[sId] || {}),
+        };
+      });
+    }
+
     await setDoc(
       classRef,
       {
         ...classData,
-        results: classData.results || {},
+        results: mergedResults,
         updatedAt: Date.now(),
-      }
+      },
+      { merge: true }
     );
     setSyncStatus('synced');
   } catch (err) {
@@ -236,28 +300,39 @@ export async function submitStudentQuizToCloud(
     const classRef = doc(db, CLASSES_COLLECTION, classId);
     const snap = await getDoc(classRef);
 
+    let existingResults: Record<string, Record<string, QuizSubmission>> = {};
     if (snap.exists()) {
       const currentData = snap.data() as ClassroomData;
-      const existingResults = currentData.results || {};
-      const studentResults = existingResults[studentId] || {};
-      studentResults[weekId] = submission;
-      existingResults[studentId] = studentResults;
+      existingResults = currentData.results || {};
+    }
+    const studentResults = { ...(existingResults[studentId] || {}) };
+    studentResults[weekId] = submission;
+    existingResults[studentId] = studentResults;
 
-      await updateDoc(classRef, {
+    await setDoc(
+      classRef,
+      {
+        id: classId,
         results: existingResults,
         updatedAt: Date.now(),
-      });
-    }
+      },
+      { merge: true }
+    );
 
     // Also write to an individual submissions collection for audit/history
     const subDocId = `${classId}_${studentId}_${weekId}`;
     const subRef = doc(db, SUBMISSIONS_COLLECTION, subDocId);
-    await setDoc(subRef, {
-      classId,
-      studentId,
-      weekId,
-      ...submission,
-    });
+    await setDoc(
+      subRef,
+      {
+        id: subDocId,
+        classId,
+        studentId,
+        weekId,
+        ...submission,
+      },
+      { merge: true }
+    );
 
     setSyncStatus('synced');
   } catch (err) {

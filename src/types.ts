@@ -24,10 +24,13 @@ export interface Teacher {
   id: string;
   name: string;
   email: string;
-  passwordHash: string;
+  passwordHash?: string;
   role?: 'primary' | 'co-teacher' | 'department-head' | 'ta';
   subject?: string;
   avatar?: string;
+  photoURL?: string;
+  isGoogleAuth?: boolean;
+  googleUid?: string;
   createdAt?: number;
   resetCode?: {
     code: string;

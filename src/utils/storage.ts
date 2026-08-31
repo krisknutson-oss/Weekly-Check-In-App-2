@@ -38,8 +38,9 @@ export function generateResetCode(): string {
 
 // Generate seeded default sample class for initial teacher
 function createDefaultSampleClass(teacherId: string): ClassroomData {
-  const week1Id = uid('wk');
-  const week2Id = uid('wk');
+  const defaultClassId = 'cls_honors_integrated_science_p3';
+  const week1Id = 'wk_sample_deck_01';
+  const week2Id = 'wk_sample_deck_02';
 
   const weeks: Week[] = [
     {
@@ -55,14 +56,14 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
   ];
 
   const students: Student[] = [
-    { id: uid('stu'), name: 'Maya Lin', pin: '4821', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Devon Vance', pin: '7193', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Elena Rostova', pin: '3942', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Marcus Chen', pin: '8204', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Sofia Rodriguez', pin: '1596', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Liam O’Connor', pin: '6480', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Aaliyah Washington', pin: '5317', createdAt: Date.now() - 20 * 86400000 },
-    { id: uid('stu'), name: 'Noah Takahashi', pin: '9045', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_maya_lin', name: 'Maya Lin', pin: '4821', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_devon_vance', name: 'Devon Vance', pin: '7193', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_elena_rostova', name: 'Elena Rostova', pin: '3942', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_marcus_chen', name: 'Marcus Chen', pin: '8204', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_sofia_rodriguez', name: 'Sofia Rodriguez', pin: '1596', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_liam_oconnor', name: 'Liam O’Connor', pin: '6480', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_aaliyah_washington', name: 'Aaliyah Washington', pin: '5317', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_noah_takahashi', name: 'Noah Takahashi', pin: '9045', createdAt: Date.now() - 20 * 86400000 },
   ];
 
   const results: Record<string, Record<string, QuizSubmission>> = {};
@@ -111,7 +112,7 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
   });
 
   return {
-    id: uid('cls'),
+    id: defaultClassId,
     teacherId,
     classCode: 'SCI-301',
     className: 'Period 3: Honors Integrated Social & Natural Sciences',
@@ -129,7 +130,7 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
 
 // Initial default system store
 export function getInitialAppStore(): AppLedgerStore {
-  const defaultTeacherId = uid('tch');
+  const defaultTeacherId = 'tch_eleanor_vance';
   const defaultTeacher: Teacher = {
     id: defaultTeacherId,
     name: 'Ms. Eleanor Vance',
@@ -651,6 +652,104 @@ export function saveClassroomState(state: ClassroomState): void {
   saveAppStore(store);
 }
 
+// Handle Google sign-in for a teacher: retrieve existing account or create an isolated new one
+export function loginOrCreateGoogleTeacher(googleUser: {
+  uid: string;
+  email: string;
+  displayName?: string | null;
+  photoURL?: string | null;
+}): { teacher: Teacher; activeClass: ClassroomData; isNewAccount: boolean } {
+  const store = loadAppStore();
+  const cleanEmail = googleUser.email.trim().toLowerCase();
+
+  let existingTeacher = store.teachers.find(
+    (t) =>
+      (t.googleUid && t.googleUid === googleUser.uid) ||
+      (t.email && t.email.toLowerCase() === cleanEmail) ||
+      t.id === googleUser.uid
+  );
+
+  let isNewAccount = false;
+
+  if (existingTeacher) {
+    // Update profile with Google metadata
+    existingTeacher.googleUid = googleUser.uid;
+    existingTeacher.isGoogleAuth = true;
+    if (googleUser.photoURL) {
+      existingTeacher.photoURL = googleUser.photoURL;
+      existingTeacher.avatar = googleUser.photoURL;
+    }
+    if (googleUser.displayName && !existingTeacher.name) {
+      existingTeacher.name = googleUser.displayName;
+    }
+    saveAppStore(store);
+  } else {
+    // Register brand new isolated educator account
+    isNewAccount = true;
+    const cleanName = googleUser.displayName || cleanEmail.split('@')[0] || 'Educator';
+    const newTeacher: Teacher = {
+      id: googleUser.uid || uid('tch_g'),
+      name: cleanName,
+      email: cleanEmail,
+      role: 'primary',
+      subject: 'Integrated Sciences & Humanities',
+      photoURL: googleUser.photoURL || undefined,
+      avatar: googleUser.photoURL || undefined,
+      isGoogleAuth: true,
+      googleUid: googleUser.uid,
+      createdAt: Date.now(),
+      resetCode: null,
+    };
+
+    store.teachers.push(newTeacher);
+
+    // Automatically create a dedicated isolated classroom for this new teacher
+    const freshClass = createNewIsolatedClass(
+      newTeacher.id,
+      `${cleanName}'s Classroom`,
+      'Integrated Sciences',
+      'Period 1',
+      'Master core weekly competencies and prepare for the culminating tribunal.',
+      'Unit Culminating Activity & Socratic Tribunal'
+    );
+
+    // Provide clean starter curriculum decks and student roster for the new teacher
+    freshClass.students = [
+      { id: uid('stu'), name: 'Maya Lin', pin: '4821', createdAt: Date.now() },
+      { id: uid('stu'), name: 'Marcus Chen', pin: '8204', createdAt: Date.now() },
+      { id: uid('stu'), name: 'Elena Rostova', pin: '3942', createdAt: Date.now() },
+      { id: uid('stu'), name: 'Devon Vance', pin: '7193', createdAt: Date.now() },
+      { id: uid('stu'), name: 'Sofia Rodriguez', pin: '1596', createdAt: Date.now() },
+    ];
+
+    freshClass.weeks = [
+      {
+        ...SAMPLE_DECKS[0],
+        id: uid('wk'),
+        createdAt: Date.now() - 7 * 86400000,
+      },
+      {
+        ...SAMPLE_DECKS[1],
+        id: uid('wk'),
+        createdAt: Date.now(),
+      },
+    ];
+
+    store.classes.push(freshClass);
+    store.activeClassIdByTeacher[newTeacher.id] = freshClass.id;
+    saveAppStore(store);
+
+    existingTeacher = newTeacher;
+  }
+
+  const activeClass = getActiveClassForTeacher(existingTeacher.id);
+  return {
+    teacher: existingTeacher,
+    activeClass,
+    isNewAccount,
+  };
+}
+
 export function resetClassroomDataToDefault(): ClassroomState {
   const freshStore = getInitialAppStore();
   saveAppStore(freshStore);
@@ -658,6 +757,29 @@ export function resetClassroomDataToDefault(): ClassroomState {
 }
 
 export const resetClassroomState = resetClassroomDataToDefault;
+
+// Record student submission in local store and return updated class
+export function recordStudentSubmission(
+  classId: string,
+  studentId: string,
+  weekId: string,
+  submission: QuizSubmission
+): ClassroomData | null {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return null;
+
+  if (!cls.results) {
+    cls.results = {};
+  }
+  if (!cls.results[studentId]) {
+    cls.results[studentId] = {};
+  }
+  cls.results[studentId][weekId] = submission;
+  cls.updatedAt = Date.now();
+  saveAppStore(store);
+  return cls;
+}
 
 // Clear a specific quiz score for an individual student
 export function clearStudentQuizScore(classId: string, studentId: string, weekId: string): ClassroomData | null {

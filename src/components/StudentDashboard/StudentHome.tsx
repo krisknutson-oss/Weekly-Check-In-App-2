@@ -33,15 +33,15 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 space-y-8">
       {/* Student Welcome Banner */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-xl">
+      <div className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6 shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)]">
         <div>
-          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] inline-block px-2.5 py-1 rounded-md mb-2">
+          <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[var(--gold)] inline-block px-3 py-1 rounded-full mb-2.5 shadow-[0_2px_8px_rgba(212,175,55,0.3)]">
             Student Weekly Ledger
           </span>
           <h2 className="font-serif italic text-3xl text-white">
-            Welcome back, {student.name}<span className="text-[#888888]">.</span>
+            Welcome back, {student.name}<span className="text-[var(--gold)]">.</span>
           </h2>
-          <p className="text-xs text-[#888888] mt-1 font-mono">
+          <p className="text-xs text-[#888888] mt-1.5 font-mono">
             {completedCount} of {publishedWeeks.length} weekly check-ins completed &middot; Culminating Activity:{' '}
             <strong className="text-white font-medium">{state.culminatingActivityTitle}</strong>
           </p>
@@ -49,7 +49,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
 
         {/* High-Contrast Score Stamp */}
         {overallAverage !== null && (
-          <div className="ledger-stamp w-28 h-28 rounded-full border border-dashed border-[#D4AF37] flex flex-col items-center justify-center bg-[#D4AF37] shadow-[0_0_20px_rgba(212,175,55,0.25)] shrink-0 self-center sm:self-auto">
+          <div className="ledger-stamp w-28 h-28 rounded-full border-2 border-dashed border-[var(--gold)] flex flex-col items-center justify-center bg-[var(--gold)] shadow-[0_8px_25px_rgba(212,175,55,0.35)] shrink-0 self-center sm:self-auto">
             <span className="font-mono text-3xl font-bold text-black leading-none">
               {overallAverage}%
             </span>
@@ -62,17 +62,17 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
 
       {/* Available Check-Ins List */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-[#1F1F1F] pb-3">
+        <div className="flex items-center justify-between border-b border-white/[0.07] pb-3">
           <h3 className="font-serif italic text-xl text-white">
-            Weekly Check-In Quizzes<span className="text-[#888888]">.</span>
+            Weekly Check-In Quizzes<span className="text-[var(--gold)]">.</span>
           </h3>
-          <span className="text-xs font-mono uppercase tracking-wider text-[#666666]">
+          <span className="text-xs font-mono uppercase tracking-wider text-[#777777]">
             Answer all 20 questions each week
           </span>
         </div>
 
         {publishedWeeks.length === 0 ? (
-          <div className="bg-[#121212] border border-dashed border-[#1F1F1F] rounded-2xl p-10 text-center shadow-lg">
+          <div className="bg-gradient-to-b from-[#161616] to-[#101010] border border-dashed border-white/[0.1] rounded-3xl p-10 text-center shadow-[0_12px_32px_rgba(0,0,0,0.5)]">
             <BookOpen className="w-10 h-10 text-[#666666] mx-auto mb-2" />
             <h4 className="font-serif italic text-lg text-white mb-1">
               No Quizzes Published Yet
@@ -82,7 +82,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
             </p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3.5">
             {publishedWeeks.map((week, idx) => {
               const submission = studentResults[week.id];
               const isCompleted = Boolean(submission);
@@ -90,11 +90,11 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
               return (
                 <div
                   key={week.id}
-                  className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-lg"
+                  className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] hover:border-white/[0.18] rounded-2xl p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition shadow-[0_8px_24px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.06)]"
                 >
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <div className="flex items-center gap-2.5">
-                      <span className="font-mono font-bold text-xs bg-[#D4AF37] text-black px-2.5 py-0.5 rounded-md">
+                      <span className="font-mono font-bold text-xs bg-[var(--gold)] text-black px-3 py-0.5 rounded-lg shadow-xs">
                         Week {idx + 1}
                       </span>
                       <h4 className="font-serif italic text-lg text-white">
@@ -106,7 +106,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                       <span>{week.quiz.length} Questions</span>
                       <span>&middot;</span>
                       {isCompleted ? (
-                        <span className="text-[#22C55E] font-medium flex items-center gap-1">
+                        <span className="text-[#22C55E] font-medium flex items-center gap-1.5">
                           <CheckCircle2 className="w-3.5 h-3.5" />
                           <span>
                             Completed &middot; Score: {submission.score}/{submission.total} (
@@ -129,9 +129,9 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                           playClickSound();
                           onViewFeedback(week);
                         }}
-                        className="px-4 py-2 bg-[#161616] border border-[#1F1F1F] hover:border-[#555555] text-white hover:text-white rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-1.5"
+                        className="px-4 py-2.5 bg-gradient-to-b from-[#202020] to-[#151515] hover:from-[#282828] hover:to-[#1C1C1C] border border-white/[0.1] text-white rounded-xl text-xs font-mono uppercase tracking-wider transition cursor-pointer flex items-center gap-2 shadow-[0_4px_10px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.08)] active:scale-98"
                       >
-                        <Eye className="w-3.5 h-3.5 text-white" />
+                        <Eye className="w-3.5 h-3.5 text-[var(--gold)]" />
                         <span>Review Explanations</span>
                       </button>
                     ) : (
@@ -141,7 +141,7 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
                           playClickSound();
                           onStartQuiz(week);
                         }}
-                        className="px-5 py-2.5 bg-[#D4AF37] hover:bg-[#E5C158] text-black rounded-lg text-xs font-mono font-bold uppercase tracking-widest transition cursor-pointer flex items-center gap-2 shadow-[0_0_15px_rgba(212,175,55,0.2)]"
+                        className="px-6 py-3 bg-gradient-to-b from-[var(--gold-light,#E5C158)] to-[var(--gold,#D4AF37)] hover:brightness-110 text-black rounded-2xl text-xs font-mono font-bold uppercase tracking-widest transition cursor-pointer flex items-center gap-2 shadow-[0_6px_20px_rgba(212,175,55,0.3),inset_0_1px_0_rgba(255,255,255,0.4)] active:scale-98"
                       >
                         <Play className="w-3.5 h-3.5 text-black fill-current" />
                         <span>Take Check-In</span>
@@ -156,8 +156,8 @@ export const StudentHome: React.FC<StudentHomeProps> = ({
       </div>
 
       {/* Culminating Goal Note */}
-      <div className="bg-[#121212] border border-[#1F1F1F] rounded-xl p-5 flex items-start gap-3 shadow-lg">
-        <Sparkles className="w-5 h-5 text-white shrink-0 mt-0.5" />
+      <div className="bg-gradient-to-b from-[#161616] to-[#111111] border border-white/[0.08] rounded-2xl p-5 flex items-start gap-3.5 shadow-[0_6px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)]">
+        <Sparkles className="w-5 h-5 text-[var(--gold)] shrink-0 mt-0.5" />
         <div>
           <h5 className="font-serif italic text-sm text-white">
             Why we do weekly check-ins:

@@ -53,14 +53,14 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Teacher Card */}
         <div
           id="teacher-portal-card"
-          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
+          className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] hover:border-white/[0.2] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] hover:-translate-y-1"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#D4AF37] border border-[#D4AF37] px-2.5 py-1 rounded-md">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[var(--gold)] px-3 py-1 rounded-full shadow-xs">
                 Staff &middot; Co-Teachers
               </span>
-              <Shield className="w-5 h-5 text-[#888888] group-hover:text-white transition-colors" />
+              <Shield className="w-5 h-5 text-[#888888] group-hover:text-[var(--gold)] transition-colors" />
             </div>
             <h3 className="font-serif italic text-2xl text-white mb-2.5">
               Teacher Dashboard
@@ -74,9 +74,9 @@ export const LandingView: React.FC<LandingViewProps> = ({
             <button
               id="go-teacher-btn"
               onClick={handleTeacherClick}
-              className="w-full py-3.5 px-4 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white font-medium rounded-xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer group-hover:bg-[#161616]"
+              className="w-full py-3.5 px-4 bg-gradient-to-b from-[#222222] to-[#161616] hover:from-[#2a2a2a] hover:to-[#1e1e1e] border border-white/[0.1] hover:border-white/[0.2] text-white font-medium rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_4px_12px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.1)] active:scale-98"
             >
-              <LogIn className="w-3.5 h-3.5" />
+              <LogIn className="w-3.5 h-3.5 text-[var(--gold)]" />
               <span>Teacher Login / Dashboard</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
@@ -86,11 +86,11 @@ export const LandingView: React.FC<LandingViewProps> = ({
         {/* Student Card */}
         <div
           id="student-portal-card"
-          className="bg-[#121212] border border-[#1F1F1F] hover:border-[#333333] rounded-2xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-xl"
+          className="bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] hover:border-white/[0.2] rounded-3xl p-8 text-left transition-all duration-300 flex flex-col justify-between group shadow-[0_16px_40px_rgba(0,0,0,0.7),inset_0_1px_0_rgba(255,255,255,0.08)] hover:-translate-y-1"
         >
           <div>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#22C55E] border border-[#22C55E] px-2.5 py-1 rounded-md">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-black font-bold bg-[#22C55E] px-3 py-1 rounded-full shadow-xs">
                 Roster &middot; Students
               </span>
               <Award className="w-5 h-5 text-[#888888] group-hover:text-[#22C55E] transition-colors" />
@@ -106,7 +106,7 @@ export const LandingView: React.FC<LandingViewProps> = ({
           <button
             id="go-student-btn"
             onClick={handleStudentClick}
-            className="w-full py-3.5 px-4 bg-[#D4AF37] hover:bg-[#E5C158] text-black font-bold rounded-xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_15px_rgba(212,175,55,0.25)]"
+            className="w-full py-3.5 px-4 bg-gradient-to-b from-[var(--gold-light,#E5C158)] to-[var(--gold,#D4AF37)] hover:brightness-110 text-black font-bold rounded-2xl text-xs uppercase tracking-widest transition flex items-center justify-center gap-2 cursor-pointer shadow-[0_6px_20px_rgba(212,175,55,0.35),inset_0_1px_0_rgba(255,255,255,0.4)] active:scale-98"
           >
             <span>Open Student Portal</span>
             <ArrowRight className="w-3.5 h-3.5 text-black" />
@@ -115,10 +115,10 @@ export const LandingView: React.FC<LandingViewProps> = ({
       </div>
 
       {/* Classroom Status Snapshot */}
-      <div className="w-full max-w-3xl bg-[#121212] border border-[#1F1F1F] rounded-2xl p-6 sm:p-8 text-left shadow-lg">
+      <div className="w-full max-w-3xl bg-gradient-to-b from-[#181818] to-[#111111] border border-white/[0.08] rounded-3xl p-6 sm:p-8 text-left shadow-[0_12px_32px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="text-[10px] uppercase tracking-widest text-[#666666] mb-1">Active Course</div>
+            <div className="text-[10px] uppercase tracking-widest text-[#777777] mb-1 font-mono">Active Course</div>
             <h4 className="font-serif italic text-xl text-white">
               {state.className}
             </h4>
@@ -127,13 +127,13 @@ export const LandingView: React.FC<LandingViewProps> = ({
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-lg">
-              <div className="text-[9px] uppercase tracking-widest text-[#666666]">Roster</div>
+            <div className="bg-gradient-to-b from-[#1E1E1E] to-[#141414] border border-white/[0.08] px-4 py-2 rounded-2xl shadow-inner">
+              <div className="text-[9px] uppercase tracking-widest text-[#777777] font-mono">Roster</div>
               <div className="font-mono text-xs font-semibold text-white">{totalStudents} Enrolled</div>
             </div>
-            <div className="bg-[#161616] border border-[#1F1F1F] px-3.5 py-1.5 rounded-lg">
-              <div className="text-[9px] uppercase tracking-widest text-[#666666]">Modules</div>
-              <div className="font-mono text-xs font-bold text-black bg-[#D4AF37] px-2 py-0.5 rounded-md">{publishedCount} Published</div>
+            <div className="bg-gradient-to-b from-[#1E1E1E] to-[#141414] border border-white/[0.08] px-4 py-2 rounded-2xl shadow-inner">
+              <div className="text-[9px] uppercase tracking-widest text-[#777777] font-mono">Modules</div>
+              <div className="font-mono text-xs font-bold text-black bg-[var(--gold)] px-2.5 py-0.5 rounded-full mt-0.5">{publishedCount} Published</div>
             </div>
           </div>
         </div>

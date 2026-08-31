@@ -89,9 +89,17 @@ export const Topbar: React.FC<TopbarProps> = ({
         <div className="flex items-center gap-2 md:gap-3 text-xs">
           {/* Active Teacher Badge */}
           {currentTeacher && (
-            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-3 py-1 rounded-md text-[#E0E0E0]">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
-              <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono">
+            <div className="hidden md:flex items-center gap-2 bg-[#121212] border border-[#1F1F1F] px-2.5 py-1 rounded-lg text-[#E0E0E0]">
+              {currentTeacher.photoURL ? (
+                <img
+                  src={currentTeacher.photoURL}
+                  alt={currentTeacher.name}
+                  className="w-4 h-4 rounded-full object-cover border border-[var(--gold)]/50 shrink-0"
+                />
+              ) : (
+                <div className="w-1.5 h-1.5 rounded-full bg-[#D4AF37] animate-pulse" />
+              )}
+              <span className="text-[11px] uppercase tracking-wider text-[#CCCCCC] font-mono truncate max-w-[150px]">
                 {currentTeacher.name}
               </span>
             </div>
