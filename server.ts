@@ -33,6 +33,42 @@ function getGeminiClient(): GoogleGenAI | null {
 // Sleep helper
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
+// Helper: Randomize/shuffle answer options (A, B, C, D) and recalculate correctIndex
+function shuffleQuestionOptions<T extends { options: any[]; correctIndex: number }>(q: T): T {
+  const originalOptions =
+    Array.isArray(q.options) && q.options.length === 4
+      ? [...q.options]
+      : [
+          q.options?.[0] || 'Option A',
+          q.options?.[1] || 'Option B',
+          q.options?.[2] || 'Option C',
+          q.options?.[3] || 'Option D',
+        ];
+
+  const validCorrectIdx =
+    typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex < originalOptions.length
+      ? q.correctIndex
+      : 0;
+
+  const correctText = originalOptions[validCorrectIdx];
+
+  // Fisher-Yates shuffle array of indices [0, 1, 2, 3]
+  const indices = [0, 1, 2, 3];
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  const shuffledOptions = indices.map((idx) => originalOptions[idx]);
+  const newCorrectIndex = shuffledOptions.indexOf(correctText);
+
+  return {
+    ...q,
+    options: shuffledOptions,
+    correctIndex: newCorrectIndex !== -1 ? newCorrectIndex : 0,
+  };
+}
+
 // Helper: Resilient Gemini API caller with exponential backoff, fast failover on 503, and multi-model fallbacks
 async function generateContentWithRetryAndFallback(
   ai: GoogleGenAI,
@@ -181,23 +217,26 @@ Instructions:
         try {
           const parsed = JSON.parse(geminiResult.text);
           if (parsed.questions && Array.isArray(parsed.questions) && parsed.questions.length > 0) {
-            const cleaned = parsed.questions.slice(0, 20).map((q: any, idx: number) => ({
-              id: `q_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
-              question: q.question || `Question ${idx + 1}`,
-              options: Array.isArray(q.options) && q.options.length === 4
-                ? q.options
-                : [
-                    q.options?.[0] || 'Option A',
-                    q.options?.[1] || 'Option B',
-                    q.options?.[2] || 'Option C',
-                    q.options?.[3] || 'Option D',
-                  ],
-              correctIndex:
-                typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex < 4
-                  ? q.correctIndex
-                  : 0,
-              explanation: q.explanation || '',
-            }));
+            const cleaned = parsed.questions.slice(0, 20).map((q: any, idx: number) => {
+              const rawQ = {
+                id: `q_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
+                question: q.question || `Question ${idx + 1}`,
+                options: Array.isArray(q.options) && q.options.length === 4
+                  ? q.options
+                  : [
+                      q.options?.[0] || 'Option A',
+                      q.options?.[1] || 'Option B',
+                      q.options?.[2] || 'Option C',
+                      q.options?.[3] || 'Option D',
+                    ],
+                correctIndex:
+                  typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex < 4
+                    ? q.correctIndex
+                    : 0,
+                explanation: q.explanation || '',
+              };
+              return shuffleQuestionOptions(rawQ);
+            });
 
             return res.json({
               questions: cleaned,
@@ -275,13 +314,16 @@ Include 8-10 slides with key facts, concepts, dates, definitions, and theories, 
             return res.json({
               title: parsed.title || topic,
               slideText: parsed.slideText || '',
-              questions: parsed.questions.slice(0, 20).map((q: any, idx: number) => ({
-                id: `q_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
-                question: q.question,
-                options: q.options?.length === 4 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'],
-                correctIndex: q.correctIndex ?? 0,
-                explanation: q.explanation || '',
-              })),
+              questions: parsed.questions.slice(0, 20).map((q: any, idx: number) => {
+                const rawQ = {
+                  id: `q_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
+                  question: q.question,
+                  options: q.options?.length === 4 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'],
+                  correctIndex: q.correctIndex ?? 0,
+                  explanation: q.explanation || '',
+                };
+                return shuffleQuestionOptions(rawQ);
+              }),
               source: geminiResult.model,
             });
           }
@@ -433,13 +475,15 @@ function generateFallbackQuestions(text: string, title: string) {
       }
     }
 
-    questions.push({
-      id: `q_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
-      question: `Regarding ${title || 'the lesson presentation'}: Which statement correctly summarizes "${cleanPrompt}"?`,
-      options,
-      correctIndex: correctIdx,
-      explanation: `According to the presentation slides, "${primaryFact.slice(0, 90)}" represents the verified understanding.`,
-    });
+    questions.push(
+      shuffleQuestionOptions({
+        id: `q_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
+        question: `Regarding ${title || 'the lesson presentation'}: Which statement correctly summarizes "${cleanPrompt}"?`,
+        options,
+        correctIndex: correctIdx,
+        explanation: `According to the presentation slides, "${primaryFact.slice(0, 90)}" represents the verified understanding.`,
+      })
+    );
   }
 
   return questions;

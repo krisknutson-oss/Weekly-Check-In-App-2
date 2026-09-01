@@ -4,7 +4,7 @@ import { extractPptxText } from '../../utils/pptx';
 import { SAMPLE_DECKS } from '../../utils/sampleDecks';
 import { uid, saveClassroomState, clearAllScoresForWeek } from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
-import { generateClientFallbackQuestions } from '../../utils/quizGenerator';
+import { generateClientFallbackQuestions, randomizeQuizOptions, shuffleQuestionOptions } from '../../utils/quizGenerator';
 import { 
   Plus, 
   Upload, 
@@ -19,7 +19,8 @@ import {
   Layers,
   RotateCcw,
   CheckCircle2,
-  AlertOctagon
+  AlertOctagon,
+  Shuffle
 } from 'lucide-react';
 
 interface WeeksTabProps {
@@ -102,7 +103,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.questions) && data.questions.length > 0) {
-            generatedQuiz = data.questions;
+            generatedQuiz = randomizeQuizOptions(data.questions);
           }
         }
       } catch (networkErr) {
@@ -111,7 +112,9 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
       // If backend was unreachable or returned empty, use the client-side generator
       if (!generatedQuiz || generatedQuiz.length === 0) {
-        generatedQuiz = generateClientFallbackQuestions(text, week.title);
+        generatedQuiz = randomizeQuizOptions(generateClientFallbackQuestions(text, week.title));
+      } else {
+        generatedQuiz = randomizeQuizOptions(generatedQuiz);
       }
 
       const updatedWeek: Week = {
@@ -162,7 +165,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
           if (data.questions && data.questions.length > 0) {
             finalTitle = data.title || finalTitle;
             finalSlideText = data.slideText || finalSlideText;
-            finalQuestions = data.questions;
+            finalQuestions = randomizeQuizOptions(data.questions);
           }
         }
       } catch (networkErr) {
@@ -170,7 +173,9 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
       }
 
       if (!finalQuestions || finalQuestions.length === 0) {
-        finalQuestions = generateClientFallbackQuestions(finalSlideText, topicPrompt);
+        finalQuestions = randomizeQuizOptions(generateClientFallbackQuestions(finalSlideText, topicPrompt));
+      } else {
+        finalQuestions = randomizeQuizOptions(finalQuestions);
       }
 
       const updatedWeek: Week = {
@@ -205,7 +210,7 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
       title: week.title || sample.title,
       unitTitle: sample.unitTitle,
       slideText: sample.slideText,
-      quiz: sample.quiz.map((q, i) => ({ ...q, id: uid(`q_${i}`) })),
+      quiz: randomizeQuizOptions(sample.quiz.map((q, i) => ({ ...q, id: uid(`q_${i}`) }))),
       status: 'draft',
     };
 
@@ -215,6 +220,25 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
     saveClassroomState(updatedState);
     onUpdateState(updatedState);
     playSuccessChime();
+  };
+
+  // Randomize answer options across all questions in the current module
+  const handleRandomizeAllAnswers = () => {
+    if (!selectedWeek || selectedWeek.quiz.length === 0) return;
+    playClickSound();
+    const randomized = randomizeQuizOptions(selectedWeek.quiz);
+    updateSelectedWeekQuiz(randomized);
+    setFeedbackToast('Randomized answer choices (A, B, C, D) across all 20 questions.');
+    setTimeout(() => setFeedbackToast(null), 3500);
+  };
+
+  // Randomize answer options for a single question
+  const handleRandomizeSingleQuestion = (qi: number) => {
+    if (!selectedWeek || !selectedWeek.quiz[qi]) return;
+    playClickSound();
+    const newQuiz = [...selectedWeek.quiz];
+    newQuiz[qi] = shuffleQuestionOptions(newQuiz[qi]);
+    updateSelectedWeekQuiz(newQuiz);
   };
 
   // Save Quiz changes or Toggle Publish
@@ -719,13 +743,25 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
 
               {/* 20-Question Editor List */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-serif italic text-xl text-white">
-                    Quiz Editor ({selectedWeek.quiz.length} Questions)<span className="text-[#D4AF37]">.</span>
-                  </h4>
-                  <span className="text-xs text-[#888888] font-mono">
-                    Select the radio button to designate the correct answer.
-                  </span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#121212] border border-[#1F1F1F] p-4 rounded-2xl">
+                  <div>
+                    <h4 className="font-serif italic text-xl text-white">
+                      Quiz Editor ({selectedWeek.quiz.length} Questions)<span className="text-[#D4AF37]">.</span>
+                    </h4>
+                    <span className="text-xs text-[#888888] font-mono">
+                      Answer choices from slides are randomized. Select any radio button to adjust the key.
+                    </span>
+                  </div>
+                  <button
+                    id="randomize-all-answers-btn"
+                    type="button"
+                    onClick={handleRandomizeAllAnswers}
+                    className="flex items-center gap-1.5 px-3.5 py-2 bg-[#161616] hover:bg-[#202020] border border-[#2A2A2A] hover:border-[#D4AF37]/60 text-[#D4AF37] rounded-lg text-xs font-mono uppercase tracking-wider transition cursor-pointer self-start sm:self-auto shadow-xs"
+                    title="Randomize and shuffle answer choices (A, B, C, D) across all questions"
+                  >
+                    <Shuffle className="w-3.5 h-3.5" />
+                    <span>Randomize Answers</span>
+                  </button>
                 </div>
 
                 {selectedWeek.quiz.map((q, qi) => (
@@ -742,6 +778,15 @@ export const WeeksTab: React.FC<WeeksTabProps> = ({ state, onUpdateState }) => {
                           Question Prompt:
                         </span>
                       </div>
+                      <button
+                        type="button"
+                        onClick={() => handleRandomizeSingleQuestion(qi)}
+                        className="text-[#888888] hover:text-[#D4AF37] text-[11px] font-mono flex items-center gap-1 cursor-pointer transition px-2 py-1 rounded-md bg-[#161616] border border-[#1F1F1F] hover:border-[#333333]"
+                        title="Shuffle options A-D for this question"
+                      >
+                        <Shuffle className="w-3 h-3" />
+                        <span>Shuffle Options</span>
+                      </button>
                     </div>
 
                     <input

@@ -1,6 +1,41 @@
 import { Question } from '../types';
 
 /**
+ * Shuffles the answer options (A, B, C, D) for a single question and updates the correctIndex
+ */
+export function shuffleQuestionOptions<T extends { options: [string, string, string, string] | string[]; correctIndex: number }>(q: T): T {
+  const originalOptions = [...q.options];
+  const validCorrectIdx =
+    typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex < originalOptions.length
+      ? q.correctIndex
+      : 0;
+  const correctText = originalOptions[validCorrectIdx];
+
+  // Fisher-Yates shuffle array of indices
+  const indices = originalOptions.map((_, i) => i);
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+
+  const shuffledOptions = indices.map((idx) => originalOptions[idx]) as [string, string, string, string];
+  const newCorrectIndex = shuffledOptions.indexOf(correctText);
+
+  return {
+    ...q,
+    options: shuffledOptions,
+    correctIndex: newCorrectIndex !== -1 ? newCorrectIndex : 0,
+  };
+}
+
+/**
+ * Shuffles/randomizes the answer choices for an entire array of questions
+ */
+export function randomizeQuizOptions(quiz: Question[]): Question[] {
+  return quiz.map((q) => shuffleQuestionOptions(q));
+}
+
+/**
  * Client-side heuristic quiz generator for offline/static deployment (e.g. GitHub Pages)
  * Extracts key sentences, concepts, and terms from slide text and builds 20 multiple choice questions.
  */
@@ -19,7 +54,7 @@ export function generateClientFallbackQuestions(text: string, title: string): Qu
     const secondaryFact = segments[(i + 1) % segments.length] || 'standard core principles';
     const cleanPrompt = primaryFact.length > 110 ? `${primaryFact.slice(0, 110)}...` : primaryFact;
 
-    // Distribute correct option across 0..3
+    // Distribute correct option across 0..3 initially
     const correctIdx = i % 4;
     const correctOption = `It accurately describes: "${primaryFact.slice(0, 80)}${primaryFact.length > 80 ? '...' : ''}"`;
     const distractor1 = `It applies exclusively under extreme experimental conditions rather than typical scenarios`;
@@ -45,13 +80,15 @@ export function generateClientFallbackQuestions(text: string, title: string): Qu
       options[3] || 'Option D',
     ];
 
-    questions.push({
+    const rawQuestion: Question = {
       id: `q_${Date.now()}_${i}_${Math.random().toString(36).slice(2, 6)}`,
       question: `Regarding ${title || 'the lesson presentation'}: Which statement correctly summarizes "${cleanPrompt}"?`,
       options: finalOptions,
       correctIndex: correctIdx,
       explanation: `According to the presentation slides, "${primaryFact.slice(0, 90)}" represents the verified understanding.`,
-    });
+    };
+
+    questions.push(shuffleQuestionOptions(rawQuestion));
   }
 
   return questions;
