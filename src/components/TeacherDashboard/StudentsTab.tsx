@@ -1,12 +1,15 @@
 import React, { useState, useRef } from 'react';
-import { ClassroomState, QuizSubmission, Student, Teacher, ClassroomData } from '../../types';
+import { ClassroomState, QuizSubmission, Student, Teacher, ClassroomData, CoTeacherInvite } from '../../types';
 import { 
   pin4, 
   uid, 
   saveClassroomState, 
   loadAppStore, 
   copyStudentsBetweenClasses,
-  clearAllScoresForStudent
+  clearAllScoresForStudent,
+  inviteCoTeacherToClass,
+  removeCoTeacherFromClass,
+  buildClassroomStateFromClass
 } from '../../utils/storage';
 import { playClickSound, playStampSound, playSuccessChime } from '../../utils/sound';
 import {
@@ -36,6 +39,10 @@ import {
   Square,
   ArrowRight,
   RotateCcw,
+  Send,
+  Clock,
+  X,
+  UserCheck,
 } from 'lucide-react';
 
 interface StudentsTabProps {
@@ -57,6 +64,12 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
   const [armedDeleteId, setArmedDeleteId] = useState<string | null>(null);
   const [armedClearScoresStudentId, setArmedClearScoresStudentId] = useState<string | null>(null);
   const [armedDeleteTeacherId, setArmedDeleteTeacherId] = useState<string | null>(null);
+
+  // Invite Co-Teacher Modal State
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteRole, setInviteRole] = useState<'co-teacher' | 'department-head' | 'ta'>('co-teacher');
+  const [inviteFeedback, setInviteFeedback] = useState<string | null>(null);
 
   // Copy from Class Modal State
   const [showCopyModal, setShowCopyModal] = useState(false);
@@ -265,25 +278,74 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
     }
   };
 
-  // Delete co-teacher
+  // Delete co-teacher or remove access
   const handleDeleteTeacher = (teacherId: string) => {
     if (state.teachers.length <= 1) return;
 
     if (armedDeleteTeacherId === teacherId) {
       playStampSound();
-      const updatedState: ClassroomState = {
-        ...state,
-        teachers: state.teachers.filter((t) => t.id !== teacherId),
-      };
-      saveClassroomState(updatedState);
-      onUpdateState(updatedState);
+      if (state.id) {
+        const result = removeCoTeacherFromClass(state.id, teacherId);
+        if (result.success && result.updatedClass) {
+          const currentStore = loadAppStore();
+          const newState = buildClassroomStateFromClass(result.updatedClass, currentTeacher, currentStore.teachers);
+          onUpdateState(newState);
+        }
+      } else {
+        const updatedState: ClassroomState = {
+          ...state,
+          teachers: state.teachers.filter((t) => t.id !== teacherId),
+        };
+        saveClassroomState(updatedState);
+        onUpdateState(updatedState);
+      }
       setArmedDeleteTeacherId(null);
+      setPrintNotification('Co-teacher access removed.');
+      setTimeout(() => setPrintNotification(null), 3000);
     } else {
       playClickSound();
       setArmedDeleteTeacherId(teacherId);
       setTimeout(() => {
         setArmedDeleteTeacherId((prev) => (prev === teacherId ? null : prev));
       }, 3500);
+    }
+  };
+
+  // Send Gmail Co-Teacher Invitation
+  const handleSendInvite = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim() || !inviteEmail.includes('@') || !state.id) return;
+
+    const result = inviteCoTeacherToClass(state.id, inviteEmail.trim(), inviteRole, currentTeacher.name);
+    if (!result.success) {
+      setInviteFeedback(result.message);
+      return;
+    }
+
+    if (result.updatedClass) {
+      const currentStore = loadAppStore();
+      const newState = buildClassroomStateFromClass(result.updatedClass, currentTeacher, currentStore.teachers);
+      onUpdateState(newState);
+    }
+
+    playSuccessChime();
+    setPrintNotification(result.message);
+    setTimeout(() => setPrintNotification(null), 4000);
+    setInviteEmail('');
+    setShowInviteModal(false);
+  };
+
+  // Cancel pending invite
+  const handleCancelInvite = (emailToCancel: string) => {
+    if (!state.id) return;
+    playClickSound();
+    const result = removeCoTeacherFromClass(state.id, emailToCancel);
+    if (result.success && result.updatedClass) {
+      const currentStore = loadAppStore();
+      const newState = buildClassroomStateFromClass(result.updatedClass, currentTeacher, currentStore.teachers);
+      onUpdateState(newState);
+      setPrintNotification(`Invitation for ${emailToCancel} cancelled.`);
+      setTimeout(() => setPrintNotification(null), 3000);
     }
   };
 
@@ -721,9 +783,9 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
       )}
 
       {/* Quick Add Form */}
-      <form onSubmit={handleAddStudent} className="bg-[#161616] border border-[#1F1F1F] rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center">
+      <form onSubmit={handleAddStudent} className="bg-[#1C2433] border border-[#2D3B52] rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center shadow-sm">
         <div className="flex-1 w-full">
-          <label htmlFor="new-student-name" className="block text-[10px] uppercase tracking-[0.2em] font-mono text-[#888888] mb-1.5">
+          <label htmlFor="new-student-name" className="block text-[10px] uppercase tracking-[0.2em] font-mono text-[#94A3B8] mb-1.5">
             Add New Student to Roster
           </label>
           <input
@@ -732,28 +794,28 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             placeholder="Student Full Name (e.g. Kai Nakamura)"
-            className="w-full px-3.5 py-2 bg-[#0A0A0A] border border-[#1F1F1F] rounded-lg text-sm text-white focus:outline-none focus:border-[#555555] transition"
+            className="w-full px-3.5 py-2 bg-[#121824] border border-[#2B3950] rounded-lg text-sm text-white focus:outline-none focus:border-blue-400 transition"
           />
         </div>
         <button
           type="submit"
           id="add-student-submit-btn"
-          className="w-full sm:w-auto px-4 py-2 bg-[#1F1F1F] border border-[#333333] hover:border-[#555555] text-white hover:text-white text-xs uppercase tracking-widest font-mono rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 self-end"
+          className="w-full sm:w-auto px-4 py-2 bg-[#233045] hover:bg-[#2B3A54] border border-[#3B4E6F] text-white text-xs uppercase tracking-widest font-mono rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 shrink-0 self-end font-medium"
         >
-          <UserPlus className="w-3.5 h-3.5" />
+          <UserPlus className="w-3.5 h-3.5 text-blue-300" />
           <span>Add Student</span>
         </button>
       </form>
 
-      {/* Roster Table */}
+      {/* Roster Table (Lightened Slate Navy Card) */}
       {state.students.length === 0 ? (
-        <div className="border border-dashed border-[#1F1F1F] rounded-2xl p-10 text-center bg-[#161616] space-y-4">
-          <Users className="w-10 h-10 text-[#666666] mx-auto mb-2" />
+        <div className="border border-dashed border-[#2D3B52] rounded-2xl p-10 text-center bg-[#1C2433] space-y-4 shadow-sm">
+          <Users className="w-10 h-10 text-[#64748B] mx-auto mb-2" />
           <div>
             <h4 className="font-serif italic text-lg text-white mb-1">
               No students enrolled yet
             </h4>
-            <p className="text-xs text-[#888888] max-w-md mx-auto font-light">
+            <p className="text-xs text-[#94A3B8] max-w-md mx-auto font-light">
               Add students above, paste your roster via Bulk Add, or copy existing students from another classroom in your ledger.
             </p>
           </div>
@@ -762,7 +824,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
             <button
               type="button"
               onClick={handleOpenCopyModal}
-              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[var(--gold)]/40 text-[var(--gold)] rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition shadow-xs"
+              className="px-4 py-2 bg-[#151D2A] hover:bg-[#232F42] border border-blue-400/40 text-blue-300 rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition shadow-xs"
             >
               <FolderInput className="w-3.5 h-3.5" />
               <span>Copy from Another Class</span>
@@ -774,19 +836,19 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                 playClickSound();
                 setShowBulkModal(true);
               }}
-              className="px-4 py-2 bg-[#1F1F1F] hover:bg-[#2A2A2A] border border-[#333333] text-white rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
+              className="px-4 py-2 bg-[#151D2A] hover:bg-[#232F42] border border-[#2D3B52] text-white rounded-lg text-xs font-mono uppercase tracking-wider flex items-center gap-1.5 cursor-pointer transition"
             >
-              <Users className="w-3.5 h-3.5 text-[#AAAAAA]" />
+              <Users className="w-3.5 h-3.5 text-[#CBD5E1]" />
               <span>Bulk Add Names</span>
             </button>
           </div>
         </div>
       ) : (
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl overflow-hidden shadow-lg">
+        <div className="bg-[#1C2433] border border-[#2D3B52] rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-sm">
               <thead>
-                <tr className="bg-[#161616] border-b border-[#1F1F1F] font-mono text-[10px] uppercase tracking-[0.2em] text-[#888888]">
+                <tr className="bg-[#151D2A] border-b border-[#2D3B52] font-mono text-[10px] uppercase tracking-[0.2em] text-[#94A3B8]">
                   <th className="py-3 px-4">Student Name</th>
                   <th className="py-3 px-4">Login PIN</th>
                   <th className="py-3 px-4">Completed Checks</th>
@@ -794,13 +856,13 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                   <th className="py-3 px-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1F1F1F]">
+              <tbody className="divide-y divide-[#2D3B52]">
                 {state.students.map((student) => {
                   const completed = Object.keys(state.results[student.id] || {}).length;
                   const avg = getStudentAverage(student.id);
 
                   return (
-                    <tr key={student.id} className="hover:bg-[#161616] transition-colors">
+                    <tr key={student.id} className="hover:bg-[#232F42] transition-colors">
                       <td className="py-3.5 px-4 font-medium text-white">
                         {student.name}
                       </td>
@@ -812,7 +874,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                           <button
                             id={`copy-pin-${student.id}`}
                             onClick={() => copyStudentPin(student)}
-                            className="text-[#666666] hover:text-white p-1 rounded-md cursor-pointer transition-colors"
+                            className="text-[#94A3B8] hover:text-white p-1 rounded-md cursor-pointer transition-colors"
                             title="Copy student PIN"
                           >
                             {copiedId === student.id ? (
@@ -823,12 +885,12 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                           </button>
                         </div>
                       </td>
-                      <td className="py-3.5 px-4 font-mono text-xs text-[#888888]">
+                      <td className="py-3.5 px-4 font-mono text-xs text-[#94A3B8]">
                         <span className="font-semibold text-white">{completed}</span> / {publishedWeeks.length} weeks
                       </td>
                       <td className="py-3.5 px-4">
                         {avg === null ? (
-                          <span className="text-xs text-[#555555] font-mono">—</span>
+                          <span className="text-xs text-[#64748B] font-mono">—</span>
                         ) : (
                           <span
                             className={`inline-block px-2 py-0.5 rounded-md font-mono text-xs font-bold ${
@@ -852,7 +914,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                               className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer border flex items-center gap-1 ${
                                 armedClearScoresStudentId === student.id
                                   ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse font-bold'
-                                  : 'bg-transparent text-[#888888] border-[#1F1F1F] hover:text-[#EF4444] hover:border-[#EF4444]/50'
+                                  : 'bg-transparent text-[#94A3B8] border-[#2D3B52] hover:text-[#EF4444] hover:border-[#EF4444]/50'
                               }`}
                               title="Clear all quiz scores for this student to allow retaking"
                             >
@@ -866,7 +928,7 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
                             className={`px-2.5 py-1 rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer border ${
                               armedDeleteId === student.id
                                 ? 'bg-[#EF4444] text-white border-[#EF4444] animate-pulse'
-                                : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444] hover:border-[#EF4444]/50'
+                                : 'bg-transparent text-[#94A3B8] border-[#2D3B52] hover:text-[#EF4444] hover:border-[#EF4444]/50'
                             }`}
                           >
                             {armedDeleteId === student.id ? 'Confirm Remove' : 'Remove'}
@@ -882,49 +944,193 @@ export const StudentsTab: React.FC<StudentsTabProps> = ({
         </div>
       )}
 
-      {/* Teacher Account Section */}
-      <div className="pt-6 border-t border-[#1F1F1F]">
-        <h3 className="font-serif italic text-lg text-white mb-3">
-          Registered Co-Teachers &amp; Staff<span className="text-[#D4AF37]">.</span>
-        </h3>
-        <div className="bg-[#121212] border border-[#1F1F1F] rounded-2xl overflow-hidden">
+      {/* Staff & Co-Teachers Section (Lightened Slate Navy Card) */}
+      <div className="pt-6 border-t border-[#2D3B52]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+          <div>
+            <h3 className="font-serif italic text-lg text-white">
+              Registered Co-Teachers &amp; Staff<span className="text-[#D4AF37]">.</span>
+            </h3>
+            <p className="text-[11px] font-mono text-[#94A3B8]">
+              Colleagues invited via Gmail to co-teach this specific class.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              playClickSound();
+              setInviteFeedback(null);
+              setShowInviteModal(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-[11px] font-mono uppercase tracking-wider transition cursor-pointer self-start sm:self-auto font-medium shadow-sm"
+          >
+            <Send className="w-3 h-3" />
+            <span>Invite Co-Teacher</span>
+          </button>
+        </div>
+
+        <div className="bg-[#1C2433] border border-[#2D3B52] rounded-2xl overflow-hidden shadow-sm">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
-              <tr className="bg-[#161616] border-b border-[#1F1F1F] font-mono text-[10px] uppercase tracking-[0.2em] text-[#888888]">
+              <tr className="bg-[#151D2A] border-b border-[#2D3B52] font-mono text-[10px] uppercase tracking-[0.2em] text-[#94A3B8]">
                 <th className="py-2.5 px-4">Educator Name</th>
                 <th className="py-2.5 px-4">Email</th>
-                <th className="py-2.5 px-4">Role</th>
+                <th className="py-2.5 px-4">Role &amp; Status</th>
                 <th className="py-2.5 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1F1F1F]">
-              {state.teachers.map((tch) => (
-                <tr key={tch.id} className="hover:bg-[#161616] transition-colors">
-                  <td className="py-2.5 px-4 font-semibold text-white">
-                    {tch.name} {tch.id === currentTeacher.id && <span className="text-[#D4AF37] font-normal text-[11px]">(You)</span>}
-                  </td>
-                  <td className="py-2.5 px-4 font-mono text-[#888888]">{tch.email}</td>
-                  <td className="py-2.5 px-4 uppercase font-mono text-[10px] text-[#666666]">{tch.role || 'Teacher'}</td>
-                  <td className="py-2.5 px-4 text-right">
-                    {state.teachers.length > 1 && tch.id !== currentTeacher.id && (
+            <tbody className="divide-y divide-[#2D3B52]">
+              {/* Primary Teacher */}
+              <tr className="hover:bg-[#232F42] transition-colors">
+                <td className="py-2.5 px-4 font-semibold text-white flex items-center gap-2">
+                  <span>{currentTeacher.name}</span>
+                  <span className="text-[#D4AF37] font-normal text-[11px]">(You)</span>
+                </td>
+                <td className="py-2.5 px-4 font-mono text-[#94A3B8]">{currentTeacher.email}</td>
+                <td className="py-2.5 px-4 uppercase font-mono text-[10px] text-black font-semibold">
+                  Primary Instructor (Owner)
+                </td>
+                <td className="py-2.5 px-4 text-right font-mono text-[10px] text-[#64748B]">
+                  Owner
+                </td>
+              </tr>
+
+              {/* Co-Teachers */}
+              {state.teachers
+                .filter((tch) => tch.id !== currentTeacher.id)
+                .map((tch) => (
+                  <tr key={tch.id} className="hover:bg-[#232F42] transition-colors">
+                    <td className="py-2.5 px-4 font-semibold text-white">
+                      {tch.name}
+                    </td>
+                    <td className="py-2.5 px-4 font-mono text-[#94A3B8]">{tch.email}</td>
+                    <td className="py-2.5 px-4 uppercase font-mono text-[10px] text-blue-300">
+                      {tch.role || 'Co-Teacher'}
+                    </td>
+                    <td className="py-2.5 px-4 text-right">
                       <button
                         onClick={() => handleDeleteTeacher(tch.id)}
                         className={`px-2 py-0.5 rounded-lg text-[10px] font-mono uppercase tracking-wider border transition cursor-pointer ${
                           armedDeleteTeacherId === tch.id
                             ? 'bg-[#EF4444] text-white border-[#EF4444]'
-                            : 'bg-transparent text-[#666666] border-[#1F1F1F] hover:text-[#EF4444]'
+                            : 'bg-transparent text-[#94A3B8] border-[#2D3B52] hover:text-[#EF4444] hover:border-[#EF4444]/50'
                         }`}
                       >
                         {armedDeleteTeacherId === tch.id ? 'Confirm Remove' : 'Remove'}
                       </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                  </tr>
+                ))}
+
+              {/* Pending Gmail Invites */}
+              {(state.coTeacherInvites || [])
+                .filter((inv) => inv.status === 'pending')
+                .map((inv) => (
+                  <tr key={inv.email} className="bg-[#17202F]/70 hover:bg-[#232F42] transition-colors">
+                    <td className="py-2.5 px-4 font-mono text-[#94A3B8] italic">
+                      Pending Registration
+                    </td>
+                    <td className="py-2.5 px-4 font-mono text-white">{inv.email}</td>
+                    <td className="py-2.5 px-4 font-mono text-[10px] text-amber-300 flex items-center gap-1.5 py-3">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      <span>Pending Google Login ({inv.role})</span>
+                    </td>
+                    <td className="py-2.5 px-4 text-right">
+                      <button
+                        onClick={() => handleCancelInvite(inv.email)}
+                        className="px-2 py-0.5 rounded-lg text-[10px] font-mono uppercase tracking-wider border border-[#2D3B52] text-[#94A3B8] hover:text-white hover:border-[#4B5E7E] transition cursor-pointer"
+                      >
+                        Cancel Invite
+                      </button>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
       </div>
+
+      {/* Invite Co-Teacher Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+          <div className="bg-[#182234] border border-[#2D3B52] rounded-2xl max-w-md w-full p-6 shadow-2xl animate-in fade-in zoom-in duration-150">
+            <div className="flex items-center justify-between border-b border-[#2D3B52] pb-3 mb-4">
+              <div className="flex items-center gap-2 text-white">
+                <Send className="w-4 h-4 text-blue-400" />
+                <h3 className="font-mono text-sm uppercase tracking-wider font-semibold">
+                  Invite Co-Teacher via Gmail
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowInviteModal(false)}
+                className="text-[#94A3B8] hover:text-white p-1 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {inviteFeedback && (
+              <div className="mb-3 p-2.5 bg-red-950/60 border border-red-500/50 rounded-lg text-xs text-red-300 font-mono">
+                {inviteFeedback}
+              </div>
+            )}
+
+            <p className="text-xs text-[#CBD5E1] leading-relaxed mb-4">
+              Enter an educator's Gmail or academic address. When they sign in, they will automatically gain co-teacher access to <strong className="text-white">"{state.className}"</strong>.
+            </p>
+
+            <form onSubmit={handleSendInvite} className="space-y-3.5">
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider font-mono text-[#94A3B8] mb-1">
+                  Colleague's Gmail Address
+                </label>
+                <input
+                  type="email"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  placeholder="colleague@gmail.com or teacher@school.edu"
+                  className="w-full px-3.5 py-2.5 bg-[#121824] border border-[#2B3950] rounded-lg text-sm text-white focus:outline-none focus:border-blue-400 font-mono"
+                  required
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-wider font-mono text-[#94A3B8] mb-1">
+                  Role
+                </label>
+                <select
+                  value={inviteRole}
+                  onChange={(e) => setInviteRole(e.target.value as any)}
+                  className="w-full px-3.5 py-2.5 bg-[#121824] border border-[#2B3950] rounded-lg text-sm text-white focus:outline-none focus:border-blue-400 font-mono"
+                >
+                  <option value="co-teacher">Co-Teacher (Can manage weekly check-ins & roster)</option>
+                  <option value="department-head">Department Head (Full access)</option>
+                  <option value="ta">Teaching Assistant / TA</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowInviteModal(false)}
+                  className="px-4 py-2 bg-[#1C2433] hover:bg-[#2B3A54] text-[#CBD5E1] text-xs font-mono uppercase tracking-wider rounded-lg cursor-pointer transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-mono uppercase tracking-wider font-semibold rounded-lg cursor-pointer transition flex items-center gap-1.5"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  <span>Send Invite</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Bulk Add Modal */}
       {showBulkModal && (

@@ -178,7 +178,7 @@ a.bg-\[var\(--gold\)\]:active {
    ========================================================================= */
 
 .theme-light {
-  /* Background overrides for all dark/black surfaces */
+  /* Background overrides for main canvas/body */
   .bg-\[\#0A0A0A\],
   .bg-\[\#000000\],
   .bg-\[\#070D18\],
@@ -195,7 +195,18 @@ a.bg-\[var\(--gold\)\]:active {
     background-color: var(--bg-dark) !important;
   }
 
+  /* Modal & Overlay Backdrops in Day Mode */
+  .fixed.inset-0.bg-black\/80,
+  .fixed.inset-0.bg-black\/70,
+  .fixed.inset-0.bg-black\/90,
+  .fixed.inset-0.bg-black {
+    background-color: rgba(15, 23, 42, 0.45) !important;
+  }
+
+  /* Primary Light Blue Cards, Panels, Modals, & Table Containers */
   .bg-\[\#121212\],
+  .bg-\[\#1C2433\],
+  .bg-\[\#182234\],
   .bg-\[\#0F172A\],
   .bg-\[\#0D1D13\],
   .bg-\[\#1A0D12\],
@@ -204,21 +215,38 @@ a.bg-\[var\(--gold\)\]:active {
   .bg-\[\#101010\],
   .bg-\[\#0E0E0E\],
   .bg-\[\#151515\],
-  .bg-\[\#1A1A1A\] {
-    background-color: var(--card-dark) !important;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+  .bg-\[\#1A1A1A\],
+  .bg-neutral-900,
+  .bg-neutral-950,
+  .bg-slate-900,
+  .bg-slate-950,
+  .bg-zinc-900,
+  .bg-zinc-950,
+  .bg-gray-900,
+  .bg-gray-950 {
+    background-color: var(--card-dark) !important; /* #EFF6FF Light Sky Blue */
+    box-shadow: 0 1px 4px 0 rgba(37, 99, 235, 0.08), 0 1px 2px -1px rgba(37, 99, 235, 0.04);
   }
 
+  /* Secondary Soft Light Blue Surfaces, Inner Sub-headers, & Form Containers */
   .bg-\[\#161616\],
+  .bg-\[\#151D2A\],
   .bg-\[\#141414\],
   .bg-\[\#181818\],
   .bg-\[\#1E293B\],
   .bg-\[\#14291B\],
   .bg-\[\#26141D\],
-  .bg-\[\#211733\] {
-    background-color: var(--card-surface) !important;
+  .bg-\[\#211733\],
+  .bg-\[\#121824\],
+  .bg-\[\#17202F\],
+  .bg-neutral-800,
+  .bg-slate-800,
+  .bg-zinc-800,
+  .bg-gray-800 {
+    background-color: var(--card-surface) !important; /* #E0EEFE Soft Sky Blue */
   }
 
+  /* Elevated Light Blue Boxes, Action Pills, Tabs, Badges & Inner Rows */
   .bg-\[\#1F1F1F\],
   .bg-\[\#1C1C1C\],
   .bg-\[\#202020\],
@@ -230,13 +258,28 @@ a.bg-\[var\(--gold\)\]:active {
   .bg-\[\#242424\],
   .bg-\[\#262626\],
   .bg-\[\#2F2F2F\],
-  .bg-\[\#333333\] {
-    background-color: var(--card-elevated) !important;
+  .bg-\[\#333333\],
+  .bg-\[\#233045\],
+  .bg-\[\#2B3A54\],
+  .bg-\[\#2B3950\],
+  .bg-\[\#232F42\],
+  .bg-\[\#2D3B52\],
+  .bg-neutral-700,
+  .bg-slate-700,
+  .bg-zinc-700,
+  .bg-gray-700 {
+    background-color: var(--card-elevated) !important; /* #D6E8FB Elevated Light Blue */
   }
 
-  /* Borders */
+  /* Light Blue Borders */
   .border-\[\#1F1F1F\],
   .border-\[\#1E293B\],
+  .border-\[\#2D3B52\],
+  .border-\[\#2B3950\],
+  .border-\[\#2B3A54\],
+  .border-\[\#3B4E6F\],
+  .border-\[\#202B3D\],
+  .border-\[\#121824\],
   .border-\[\#1A3323\],
   .border-\[\#2E1520\],
   .border-\[\#281B3D\],
@@ -245,8 +288,12 @@ a.bg-\[var\(--gold\)\]:active {
   .border-\[\#2A2A2A\],
   .border-\[\#2F2F2F\],
   .border-\[\#242424\],
-  .border-\[\#1E1E1E\] {
-    border-color: var(--border-dark) !important;
+  .border-\[\#1E1E1E\],
+  .border-neutral-800,
+  .border-neutral-900,
+  .border-slate-800,
+  .border-slate-900 {
+    border-color: var(--border-dark) !important; /* #BFDBFE Light Blue */
   }
 
   .border-\[\#333333\],
@@ -255,8 +302,11 @@ a.bg-\[var\(--gold\)\]:active {
   .border-\[\#451E2F\],
   .border-\[\#3E2A5E\],
   .border-\[\#383838\],
-  .border-\[\#444444\] {
-    border-color: var(--border-subtle) !important;
+  .border-\[\#444444\],
+  .border-\[\#475569\],
+  .border-neutral-700,
+  .border-slate-700 {
+    border-color: var(--border-subtle) !important; /* #93C5FD */
   }
 
   /* =========================================================================
@@ -395,14 +445,20 @@ a.bg-\[var\(--gold\)\]:active {
     color: var(--text-faint) !important;
   }
 
-  /* Hover states */
+  /* Hover states in Day Mode */
   .hover\:bg-\[\#1F1F1F\]:hover,
   .hover\:bg-\[\#181818\]:hover,
   .hover\:bg-\[\#161616\]:hover,
   .hover\:bg-\[\#1A1A1A\]:hover,
+  .hover\:bg-\[\#1C1C1C\]:hover,
   .hover\:bg-\[\#202020\]:hover,
-  .hover\:bg-\[\#2A2A2A\]:hover {
-    background-color: var(--card-elevated) !important;
+  .hover\:bg-\[\#2A2A2A\]:hover,
+  .hover\:bg-\[\#232F42\]:hover,
+  .hover\:bg-\[\#2B3A54\]:hover,
+  .hover\:bg-\[\#2B3950\]:hover,
+  .hover\:bg-neutral-700:hover,
+  .hover\:bg-neutral-800:hover {
+    background-color: #CBE2F9 !important; /* Soft interactive light blue */
   }
 
   .hover\:bg-\[\#201010\]:hover,
@@ -420,7 +476,8 @@ a.bg-\[var\(--gold\)\]:active {
   }
 
   .hover\:border-\[\#333333\]:hover,
-  .hover\:border-\[\#444444\]:hover {
+  .hover\:border-\[\#444444\]:hover,
+  .hover\:border-\[\#4B5E7E\]:hover {
     border-color: var(--border-subtle) !important;
   }
 
@@ -433,7 +490,7 @@ a.bg-\[var\(--gold\)\]:active {
   input:not([type="checkbox"]):not([type="radio"]),
   select,
   textarea {
-    background-color: var(--card-dark) !important;
+    background-color: #F0F7FF !important;
     color: var(--text-primary) !important;
     border-color: var(--border-dark) !important;
   }

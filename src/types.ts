@@ -68,9 +68,20 @@ export interface QuizSubmission {
   submittedAt: number;
 }
 
+export interface CoTeacherInvite {
+  email: string;
+  role: 'co-teacher' | 'department-head' | 'ta';
+  invitedAt: number;
+  invitedBy: string; // teacherId or teacherName of inviter
+  status: 'pending' | 'accepted';
+  acceptedTeacherId?: string;
+}
+
 export interface ClassroomData {
   id: string;
-  teacherId: string; // Isolated owner teacher ID
+  teacherId: string; // Isolated primary/owner teacher ID
+  coTeachers?: string[]; // Teacher IDs explicitly added as co-teachers
+  coTeacherInvites?: CoTeacherInvite[]; // Invitations sent via Gmail / email
   classCode: string; // e.g. "SCI-301"
   className: string;
   subject?: string;
@@ -87,6 +98,8 @@ export interface ClassroomData {
 export interface ClassroomState {
   id?: string;
   teacherId?: string;
+  coTeachers?: string[];
+  coTeacherInvites?: CoTeacherInvite[];
   classCode?: string;
   students: Student[];
   teachers: Teacher[];

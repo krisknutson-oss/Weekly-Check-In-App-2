@@ -57,7 +57,7 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
 
   const students: Student[] = [
     { id: 'stu_maya_lin', name: 'Maya Lin', pin: '4821', createdAt: Date.now() - 20 * 86400000 },
-    { id: 'stu_devon_vance', name: 'Devon Vance', pin: '7193', createdAt: Date.now() - 20 * 86400000 },
+    { id: 'stu_devon_miller', name: 'Devon Miller', pin: '7193', createdAt: Date.now() - 20 * 86400000 },
     { id: 'stu_elena_rostova', name: 'Elena Rostova', pin: '3942', createdAt: Date.now() - 20 * 86400000 },
     { id: 'stu_marcus_chen', name: 'Marcus Chen', pin: '8204', createdAt: Date.now() - 20 * 86400000 },
     { id: 'stu_sofia_rodriguez', name: 'Sofia Rodriguez', pin: '1596', createdAt: Date.now() - 20 * 86400000 },
@@ -114,6 +114,8 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
   return {
     id: defaultClassId,
     teacherId,
+    coTeachers: [],
+    coTeacherInvites: [],
     classCode: 'SCI-301',
     className: 'Period 3: Honors Integrated Social & Natural Sciences',
     subject: 'Integrated Sciences',
@@ -128,44 +130,51 @@ function createDefaultSampleClass(teacherId: string): ClassroomData {
   };
 }
 
-// Initial default system store
+// Initial clean system store (no hardcoded sample teachers)
 export function getInitialAppStore(): AppLedgerStore {
-  const defaultTeacherId = 'tch_eleanor_vance';
-  const defaultTeacher: Teacher = {
-    id: defaultTeacherId,
-    name: 'Ms. Eleanor Vance',
-    email: 'teacher@school.edu',
-    // SHA-256 of 'weekly-ledger-salt-2026::teacher123'
-    passwordHash: '89db690e54d88e079717b9fe7b9b7e77a28ebf9aa0a6c0c28383cf82fae2be9b',
-    role: 'primary',
-    subject: 'Integrated Social & Natural Sciences',
-    createdAt: Date.now() - 30 * 86400000,
-    resetCode: null,
-  };
-
-  const defaultClass = createDefaultSampleClass(defaultTeacherId);
+  const defaultClass = createDefaultSampleClass('');
 
   return {
-    teachers: [defaultTeacher],
+    teachers: [],
     classes: [defaultClass],
-    activeClassIdByTeacher: {
-      [defaultTeacherId]: defaultClass.id,
-    },
+    activeClassIdByTeacher: {},
   };
 }
 
-// Load entire store from localStorage with migration
+// Load entire store from localStorage with migration and cleanup
 export function loadAppStore(): AppLedgerStore {
   try {
     const raw = localStorage.getItem(STORE_STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as AppLedgerStore;
       if (parsed && Array.isArray(parsed.teachers) && Array.isArray(parsed.classes)) {
-        // Ensure every teacher has an active class
+        // Scrub any legacy sample Eleanor Vance teachers from stored state
+        parsed.teachers = parsed.teachers.filter(
+          (t) =>
+            t.id !== 'tch_eleanor_vance' &&
+            !t.name?.toLowerCase().includes('eleanor vance') &&
+            t.email !== 'teacher@school.edu'
+        );
+
+        // Sanitize and ensure co-teacher array fields on all classes
+        parsed.classes.forEach((c) => {
+          if (c.teacherId === 'tch_eleanor_vance') {
+            c.teacherId = parsed.teachers.length > 0 ? parsed.teachers[0].id : '';
+          }
+          if (!Array.isArray(c.coTeachers)) {
+            c.coTeachers = [];
+          }
+          if (!Array.isArray(c.coTeacherInvites)) {
+            c.coTeacherInvites = [];
+          }
+        });
+
+        // Ensure every real teacher has an active class
         parsed.teachers.forEach((t) => {
-          const teacherClasses = parsed.classes.filter((c) => c.teacherId === t.id);
+          const teacherClasses = parsed.classes.filter(
+            (c) => c.teacherId === t.id || c.coTeachers?.includes(t.id)
+          );
           if (teacherClasses.length === 0) {
-            // Provision an isolated class for this teacher
             const freshClass = createNewIsolatedClass(t.id, `${t.name}'s Classroom`, t.subject || 'General Studies');
             parsed.classes.push(freshClass);
             parsed.activeClassIdByTeacher[t.id] = freshClass.id;
@@ -173,51 +182,8 @@ export function loadAppStore(): AppLedgerStore {
             parsed.activeClassIdByTeacher[t.id] = teacherClasses[0].id;
           }
         });
+
         return parsed;
-      }
-    }
-
-    // Try migration from legacy single classroom state
-    const legacyRaw = localStorage.getItem(LEGACY_STORAGE_KEY);
-    if (legacyRaw) {
-      try {
-        const legacy = JSON.parse(legacyRaw) as ClassroomState;
-        if (legacy && legacy.teachers && legacy.teachers.length > 0) {
-          const primaryTeacher = legacy.teachers[0];
-          const legacyClass: ClassroomData = {
-            id: uid('cls'),
-            teacherId: primaryTeacher.id,
-            classCode: 'SCI-301',
-            className: legacy.className || 'Period 3: Honors Social & Natural Sciences',
-            unitGoal: legacy.unitGoal || 'Master core weekly competencies for the culminating assessment.',
-            culminatingActivityTitle: legacy.culminatingActivityTitle || 'Unit Culminating Activity & Socratic Tribunal',
-            students: legacy.students || [],
-            weeks: legacy.weeks || [],
-            results: legacy.results || {},
-            createdAt: Date.now() - 30 * 86400000,
-            updatedAt: Date.now(),
-          };
-
-          const newStore: AppLedgerStore = {
-            teachers: legacy.teachers,
-            classes: [legacyClass],
-            activeClassIdByTeacher: {
-              [primaryTeacher.id]: legacyClass.id,
-            },
-          };
-
-          // If other legacy teachers exist, give them their own isolated classes
-          legacy.teachers.slice(1).forEach((t) => {
-            const extraClass = createNewIsolatedClass(t.id, `${t.name}'s Class`, t.subject || 'General Studies');
-            newStore.classes.push(extraClass);
-            newStore.activeClassIdByTeacher[t.id] = extraClass.id;
-          });
-
-          saveAppStore(newStore);
-          return newStore;
-        }
-      } catch (legacyErr) {
-        console.warn('Could not parse legacy data, creating fresh store:', legacyErr);
       }
     }
 
@@ -260,6 +226,8 @@ export function createNewIsolatedClass(
   return {
     id: uid('cls'),
     teacherId,
+    coTeachers: [],
+    coTeacherInvites: [],
     classCode: generateClassCode(subject.slice(0, 3) || 'CLS'),
     className: className.trim(),
     subject: subject.trim(),
@@ -274,10 +242,117 @@ export function createNewIsolatedClass(
   };
 }
 
-// Get all classes strictly belonging to a specific teacher
-export function getClassesForTeacher(teacherId: string): ClassroomData[] {
+// Get all classes strictly belonging to or co-taught by a specific teacher
+export function getClassesForTeacher(teacherId: string, teacherEmail?: string): ClassroomData[] {
   const store = loadAppStore();
-  return store.classes.filter((c) => c.teacherId === teacherId);
+  const cleanEmail = teacherEmail?.trim().toLowerCase();
+  return store.classes.filter(
+    (c) =>
+      c.teacherId === teacherId ||
+      c.coTeachers?.includes(teacherId) ||
+      (cleanEmail && c.coTeacherInvites?.some((inv) => inv.email.toLowerCase() === cleanEmail))
+  );
+}
+
+// Invite a teacher by Gmail/email to co-teach a specific classroom
+export function inviteCoTeacherToClass(
+  classId: string,
+  email: string,
+  role: 'co-teacher' | 'department-head' | 'ta' = 'co-teacher',
+  inviterNameOrId: string = 'Class Primary Educator'
+): { success: boolean; message: string; updatedClass?: ClassroomData } {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) {
+    return { success: false, message: 'Classroom could not be found.' };
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+    return { success: false, message: 'Please enter a valid educator Gmail or school email address.' };
+  }
+
+  // Check if target is already the primary owner
+  const ownerTeacher = store.teachers.find((t) => t.id === cls.teacherId);
+  if (ownerTeacher && ownerTeacher.email.trim().toLowerCase() === cleanEmail) {
+    return { success: false, message: 'This email belongs to the primary instructor of this class.' };
+  }
+
+  if (!cls.coTeachers) cls.coTeachers = [];
+  if (!cls.coTeacherInvites) cls.coTeacherInvites = [];
+
+  // Check if already invited or added
+  const existingInvite = cls.coTeacherInvites.find((inv) => inv.email.toLowerCase() === cleanEmail);
+  if (existingInvite) {
+    return { success: false, message: `An invitation has already been sent to ${cleanEmail}.` };
+  }
+
+  // Check if teacher is already registered in the system
+  const registeredTeacher = store.teachers.find((t) => t.email.trim().toLowerCase() === cleanEmail);
+
+  if (registeredTeacher) {
+    if (!cls.coTeachers.includes(registeredTeacher.id)) {
+      cls.coTeachers.push(registeredTeacher.id);
+    }
+    cls.coTeacherInvites.push({
+      email: cleanEmail,
+      role,
+      invitedAt: Date.now(),
+      invitedBy: inviterNameOrId,
+      status: 'accepted',
+      acceptedTeacherId: registeredTeacher.id,
+    });
+    cls.updatedAt = Date.now();
+    saveAppStore(store);
+    return {
+      success: true,
+      message: `Added registered educator ${registeredTeacher.name} (${cleanEmail}) as ${role}!`,
+      updatedClass: cls,
+    };
+  }
+
+  // Pending Gmail invitation
+  cls.coTeacherInvites.push({
+    email: cleanEmail,
+    role,
+    invitedAt: Date.now(),
+    invitedBy: inviterNameOrId,
+    status: 'pending',
+  });
+  cls.updatedAt = Date.now();
+  saveAppStore(store);
+
+  return {
+    success: true,
+    message: `Invitation sent to ${cleanEmail}. When they log in with Google, they will automatically gain co-teaching access.`,
+    updatedClass: cls,
+  };
+}
+
+// Remove a co-teacher or cancel an invitation for a specific classroom
+export function removeCoTeacherFromClass(
+  classId: string,
+  identifier: string // teacherId or email
+): { success: boolean; updatedClass?: ClassroomData } {
+  const store = loadAppStore();
+  const cls = store.classes.find((c) => c.id === classId);
+  if (!cls) return { success: false };
+
+  const cleanIdent = identifier.trim().toLowerCase();
+
+  if (cls.coTeachers) {
+    cls.coTeachers = cls.coTeachers.filter((id) => id !== identifier);
+  }
+
+  if (cls.coTeacherInvites) {
+    cls.coTeacherInvites = cls.coTeacherInvites.filter(
+      (inv) => inv.email.toLowerCase() !== cleanIdent && inv.acceptedTeacherId !== identifier
+    );
+  }
+
+  cls.updatedAt = Date.now();
+  saveAppStore(store);
+  return { success: true, updatedClass: cls };
 }
 
 // Get the active class for a teacher (guaranteeing one exists)
@@ -442,23 +517,6 @@ export function deleteClassForTeacher(teacherId: string, classId: string): boole
   return true;
 }
 
-// Register a new teacher and create their isolated class
-export function registerNewTeacherAccount(newTeacher: Teacher, initialClassName?: string): ClassroomData {
-  const store = loadAppStore();
-  store.teachers.push(newTeacher);
-
-  const freshClass = createNewIsolatedClass(
-    newTeacher.id,
-    initialClassName || `${newTeacher.name}'s Classroom`,
-    newTeacher.subject || 'General Studies'
-  );
-  store.classes.push(freshClass);
-  store.activeClassIdByTeacher[newTeacher.id] = freshClass.id;
-
-  saveAppStore(store);
-  return freshClass;
-}
-
 // Update teacher profile
 export function updateTeacherProfile(updatedTeacher: Teacher): void {
   const store = loadAppStore();
@@ -559,38 +617,64 @@ export function getLastSelectedStudentClass(): string | null {
   }
 }
 
-// Helper to convert ClassroomData into the active ClassroomState
+// Helper to convert ClassroomData into the active ClassroomState with strictly isolated co-teachers
 export function buildClassroomStateFromClass(
   classData: ClassroomData,
-  teacher: Teacher,
+  teacher?: Teacher | null,
   allTeachers: Teacher[] = []
 ): ClassroomState {
+  const primaryTeacher =
+    teacher ||
+    allTeachers.find((t) => t.id === classData.teacherId) ||
+    (allTeachers.length > 0 ? allTeachers[0] : null) || {
+      id: classData.teacherId || uid('tch'),
+      name: 'Class Instructor',
+      email: '',
+      role: 'primary' as const,
+    };
+
+  // Co-teachers assigned to THIS specific class only
+  const classCoTeacherIds = new Set(classData.coTeachers || []);
+  const classInvitedEmails = new Set(
+    (classData.coTeacherInvites || [])
+      .filter((inv) => inv.status === 'accepted' || inv.status === 'pending')
+      .map((inv) => inv.email.trim().toLowerCase())
+  );
+
+  const matchedCoTeachers = allTeachers.filter(
+    (t) =>
+      t.id !== primaryTeacher.id &&
+      (classCoTeacherIds.has(t.id) || (t.email && classInvitedEmails.has(t.email.trim().toLowerCase())))
+  );
+
   return {
     id: classData.id,
     teacherId: classData.teacherId,
+    coTeachers: classData.coTeachers || [],
+    coTeacherInvites: classData.coTeacherInvites || [],
     classCode: classData.classCode,
     className: classData.className,
     subject: classData.subject,
     period: classData.period,
     unitGoal: classData.unitGoal,
     culminatingActivityTitle: classData.culminatingActivityTitle,
-    students: classData.students,
-    weeks: classData.weeks,
-    results: classData.results,
-    teachers: [teacher, ...allTeachers.filter((t) => t.id !== teacher.id)],
+    students: classData.students || [],
+    weeks: classData.weeks || [],
+    results: classData.results || {},
+    teachers: [primaryTeacher, ...matchedCoTeachers],
   };
 }
 
 // Legacy adapter methods so existing components stay fully operational
 export function loadClassroomState(): ClassroomState {
   const store = loadAppStore();
-  if (store.teachers.length === 0) {
+  if (store.classes.length === 0) {
     const fresh = getInitialAppStore();
-    return buildClassroomStateFromClass(fresh.classes[0], fresh.teachers[0], fresh.teachers);
+    return buildClassroomStateFromClass(fresh.classes[0], fresh.teachers[0] || null, fresh.teachers);
   }
-  const teacher = store.teachers[0];
-  const activeClass = getActiveClassForTeacher(teacher.id);
-  return buildClassroomStateFromClass(activeClass, teacher, store.teachers);
+  const firstClass = store.classes[0];
+  const teacher = store.teachers.find((t) => t.id === firstClass.teacherId) || store.teachers[0] || null;
+  return buildClassroomStateFromClass(firstClass, teacher, store.teachers);
 }
 
 export function saveClassroomState(state: ClassroomState): void {
@@ -615,6 +699,8 @@ export function saveClassroomState(state: ClassroomState): void {
       students: state.students,
       weeks: state.weeks,
       results: state.results,
+      coTeachers: state.coTeachers || store.classes[targetClassIdx].coTeachers || [],
+      coTeacherInvites: state.coTeacherInvites || store.classes[targetClassIdx].coTeacherInvites || [],
       updatedAt: Date.now(),
     };
   } else if (state.teacherId) {
@@ -622,6 +708,8 @@ export function saveClassroomState(state: ClassroomState): void {
     const newCls: ClassroomData = {
       id: state.id || uid('cls'),
       teacherId: state.teacherId,
+      coTeachers: state.coTeachers || [],
+      coTeacherInvites: state.coTeacherInvites || [],
       classCode: state.classCode || generateClassCode('CLS'),
       className: state.className,
       subject: state.subject,
@@ -650,6 +738,40 @@ export function saveClassroomState(state: ClassroomState): void {
   }
 
   saveAppStore(store);
+}
+
+// Register a new teacher and create their isolated class (and auto-link any pending co-teacher invites)
+export function registerNewTeacherAccount(newTeacher: Teacher, initialClassName?: string): ClassroomData {
+  const store = loadAppStore();
+  store.teachers.push(newTeacher);
+
+  const cleanEmail = newTeacher.email.trim().toLowerCase();
+
+  // Check if this new teacher has any pending Gmail invitations to co-teach
+  store.classes.forEach((cls) => {
+    if (!cls.coTeachers) cls.coTeachers = [];
+    if (!cls.coTeacherInvites) cls.coTeacherInvites = [];
+    cls.coTeacherInvites.forEach((inv) => {
+      if (inv.email.toLowerCase() === cleanEmail) {
+        inv.status = 'accepted';
+        inv.acceptedTeacherId = newTeacher.id;
+        if (!cls.coTeachers?.includes(newTeacher.id)) {
+          cls.coTeachers?.push(newTeacher.id);
+        }
+      }
+    });
+  });
+
+  const freshClass = createNewIsolatedClass(
+    newTeacher.id,
+    initialClassName || `${newTeacher.name}'s Classroom`,
+    newTeacher.subject || 'General Studies'
+  );
+  store.classes.push(freshClass);
+  store.activeClassIdByTeacher[newTeacher.id] = freshClass.id;
+
+  saveAppStore(store);
+  return freshClass;
 }
 
 // Handle Google sign-in for a teacher: retrieve existing account or create an isolated new one
@@ -682,6 +804,22 @@ export function loginOrCreateGoogleTeacher(googleUser: {
     if (googleUser.displayName && !existingTeacher.name) {
       existingTeacher.name = googleUser.displayName;
     }
+
+    // Check for any newly pending invitations
+    store.classes.forEach((cls) => {
+      if (!cls.coTeachers) cls.coTeachers = [];
+      if (!cls.coTeacherInvites) cls.coTeacherInvites = [];
+      cls.coTeacherInvites.forEach((inv) => {
+        if (inv.email.toLowerCase() === cleanEmail) {
+          inv.status = 'accepted';
+          inv.acceptedTeacherId = existingTeacher!.id;
+          if (!cls.coTeachers?.includes(existingTeacher!.id)) {
+            cls.coTeachers?.push(existingTeacher!.id);
+          }
+        }
+      });
+    });
+
     saveAppStore(store);
   } else {
     // Register brand new isolated educator account
@@ -703,6 +841,21 @@ export function loginOrCreateGoogleTeacher(googleUser: {
 
     store.teachers.push(newTeacher);
 
+    // Check if this newly signed in teacher was invited to any classes
+    store.classes.forEach((cls) => {
+      if (!cls.coTeachers) cls.coTeachers = [];
+      if (!cls.coTeacherInvites) cls.coTeacherInvites = [];
+      cls.coTeacherInvites.forEach((inv) => {
+        if (inv.email.toLowerCase() === cleanEmail) {
+          inv.status = 'accepted';
+          inv.acceptedTeacherId = newTeacher.id;
+          if (!cls.coTeachers?.includes(newTeacher.id)) {
+            cls.coTeachers?.push(newTeacher.id);
+          }
+        }
+      });
+    });
+
     // Automatically create a dedicated isolated classroom for this new teacher
     const freshClass = createNewIsolatedClass(
       newTeacher.id,
@@ -718,7 +871,7 @@ export function loginOrCreateGoogleTeacher(googleUser: {
       { id: uid('stu'), name: 'Maya Lin', pin: '4821', createdAt: Date.now() },
       { id: uid('stu'), name: 'Marcus Chen', pin: '8204', createdAt: Date.now() },
       { id: uid('stu'), name: 'Elena Rostova', pin: '3942', createdAt: Date.now() },
-      { id: uid('stu'), name: 'Devon Vance', pin: '7193', createdAt: Date.now() },
+      { id: uid('stu'), name: 'Devon Miller', pin: '7193', createdAt: Date.now() },
       { id: uid('stu'), name: 'Sofia Rodriguez', pin: '1596', createdAt: Date.now() },
     ];
 
@@ -753,7 +906,7 @@ export function loginOrCreateGoogleTeacher(googleUser: {
 export function resetClassroomDataToDefault(): ClassroomState {
   const freshStore = getInitialAppStore();
   saveAppStore(freshStore);
-  return buildClassroomStateFromClass(freshStore.classes[0], freshStore.teachers[0], freshStore.teachers);
+  return buildClassroomStateFromClass(freshStore.classes[0], freshStore.teachers[0] || null, freshStore.teachers);
 }
 
 export const resetClassroomState = resetClassroomDataToDefault;
